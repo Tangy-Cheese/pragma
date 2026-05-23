@@ -1,5 +1,7 @@
 #include "lexer.hpp"
+#include "tokenizer.hpp"
 
+#include <cctype>
 #include <iostream>
 #include <fstream>
 
@@ -33,9 +35,80 @@ void Lexer::conv_string(std::ifstream& input){
 void Lexer::scan(){
 
     size_t N = Lexer::file_string.length();
+    std::string buffer;
 
     for (int i=0; i<N; i++){
+        
+        char _character = Lexer::file_string[i];
+        
+        if (std::isalpha(_character)){
+            while (isalpha(_character)){
+                buffer.push_back(_character);
 
+                i++;
+
+                if (buffer == "return"){
+                    v.push_back(Group(TokenType::RETURN, "return", i, j));
+                    buffer.clear();
+                }   
+            }
+        }
+
+        else if (std::isspace(_character)){
+         
+            while (isalpha(_character)){
+                buffer.push_back(_character);
+
+                i++;
+
+                if (buffer == "return"){
+                    v.push_back(Group(TokenType::RETURN, "return", i, j));
+                    buffer.clear();
+                }   
+            }
+        }
+
+        
+        else if (std::isspace(_character)){
+         
+            while (isalpha(_character)){
+                buffer.push_back(_character);
+
+                i++;
+
+                if (buffer == "return"){
+                    v.push_back(Group(TokenType::RETURN, "return", i, j));
+                    buffer.clear();
+                }   
+            }
+        }
+
+        else if (std::isspace(_character)){
+         
+            while (isalpha(_character)){
+                buffer.push_back(_character);
+
+                i++;
+
+                if (buffer == "return"){
+                    v.push_back(Group(TokenType::RETURN, "return", i, j));
+                    buffer.clear();
+                }   
+            }
+        }
+
+        else{         
+            while (isalpha(_character)){
+                buffer.push_back(_character);
+
+                i++;
+
+                if (buffer == "return"){
+                    v.push_back(Group(TokenType::RETURN, "return", i, j));
+                    buffer.clear();
+                }   
+            }
+        }
     }
 }
 
