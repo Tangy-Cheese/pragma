@@ -5,112 +5,131 @@
 #include <iostream>
 #include <fstream>
 
-Lexer::Lexer(){
+Lexer::Lexer(std::string file_name){
 
-    // define your file name
-    std::string file_name = "file.pragma";
     std::ifstream input_stream(file_name);
 
     // check stream status
     if (!input_stream) std::cerr << "Can't open input file!";
 
     conv_string(input_stream);
+
+    // Build the hashmap
+    keyword_map.insert({"return",TokenType::RETURN});
+    keyword_map.insert({"fn",TokenType::FUNC});
+    keyword_map.insert({"out",TokenType::PRINT});
 }
+
+Lexer::~Lexer(){}
+
 
 void Lexer::conv_string(std::ifstream& input){
 
-    std::vector<std::string> text;
-
     // one line
     std::string line;
-
+    
     // extract all the text from the input file
     while (getline(input, line)) {
 
-        // store each line in the vector
-        Lexer::file_string.append(line);
+        // store each line in the vector along with counter
+        Lexer::file_strings.push_back(line);
     }
 }
 
 void Lexer::scan(){
-
-    size_t N = Lexer::file_string.length();
-    std::string buffer;
-
-    for (int i=0; i<N; i++){
+    
+    for (int row=0; row<Lexer::file_strings.size(); row++) {
+           
+        // Number of chars in each line
+        size_t N = Lexer::file_strings[row].length(); 
+        row_idx = row;
         
-        char _character = Lexer::file_string[i];
-        
-        if (std::isalpha(_character)){
-            while (isalpha(_character)){
-                buffer.push_back(_character);
+        std::string row_str = Lexer::file_strings[row];
+        std::string buffer;
 
-                i++;
+        for (int i=0; i<N; i++){
+            
+            char _char = row_str[i];
+            
+            if (std::isalpha(_char)){
+                while (isalpha(_char)){
 
-                if (buffer == "return"){
-                    v.push_back(Group(TokenType::RETURN, "return", i, j));
-                    buffer.clear();
-                }   
+                    buffer.push_back(_char);
+
+                    i++;
+                    char _char = row_str[i];
+
+                    if (buffer == "return"){
+
+                        Group s;
+                        s.token_type = TokenType::RETURN;
+                        s.literal = buffer;
+                        s.row_idx = row;
+
+                        v.push_back(s);
+                        buffer.clear();
+                    }
+
+                    if (buffer == "fn"){
+
+                        Group s;
+                        s.token_type = TokenType::FUNC;
+                        s.literal = buffer;
+                        s.row_idx = row;
+
+                        v.push_back(s);
+                        buffer.clear();
+                    }
+                    i--;
+                }
             }
-        }
 
-        else if (std::isspace(_character)){
-         
-            while (isalpha(_character)){
-                buffer.push_back(_character);
+            else if (std::isspace(_char)){
+             
+                while (isalpha(_char)){
+                    buffer.push_back(_char);
 
-                i++;
+                    i++;
 
-                if (buffer == "return"){
-                    v.push_back(Group(TokenType::RETURN, "return", i, j));
-                    buffer.clear();
-                }   
+                    if (buffer == "return"){
+                        v.push_back(Group(TokenType::RETURN, "return", row));
+                        buffer.clear();
+                    }   
+                    i--;
+                }
             }
-        }
 
-        
-        else if (std::isspace(_character)){
-         
-            while (isalpha(_character)){
-                buffer.push_back(_character);
+            else if (std::isdigit(_char)){
+             
+                while (isdigit(_char)){
+                    buffer.push_back(_char);
 
-                i++;
+                    i++;
 
-                if (buffer == "return"){
-                    v.push_back(Group(TokenType::RETURN, "return", i, j));
-                    buffer.clear();
-                }   
+                    if (buffer == "return"){
+                        v.push_back(Group(TokenType::RETURN, "return", row));
+                        buffer.clear();
+                    }   
+                }
             }
-        }
+            
+            // identifiers/var names
+            else{         
+                while (isalpha(_char)){
+                    buffer.push_back(_char);
 
-        else if (std::isspace(_character)){
-         
-            while (isalpha(_character)){
-                buffer.push_back(_character);
+                    i++;
 
-                i++;
-
-                if (buffer == "return"){
-                    v.push_back(Group(TokenType::RETURN, "return", i, j));
-                    buffer.clear();
-                }   
-            }
-        }
-
-        else{         
-            while (isalpha(_character)){
-                buffer.push_back(_character);
-
-                i++;
-
-                if (buffer == "return"){
-                    v.push_back(Group(TokenType::RETURN, "return", i, j));
-                    buffer.clear();
-                }   
+                    if (buffer == "return"){
+                        v.push_back(Group(TokenType::RETURN, "return", row));
+                        buffer.clear();
+                    }   
+                }
             }
         }
     }
 }
+
 
 std::vector<Group> Lexer::get_token_vector(){
     return v;

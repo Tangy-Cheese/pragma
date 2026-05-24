@@ -5,23 +5,23 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
 
 struct Group{
 
     TokenType token_type;
     std::string literal;
-    size_t col_idx;
     size_t row_idx;
 };
 
 class Lexer{
 
 public:
-    Lexer();
+    Lexer(std::string filename);
     ~Lexer();
     
     /**
-     * @brief Convert the .pragma file to a long string.
+     * @brief Convert the .pragma file to a vector of long strings indexed by row number.
      */
     void conv_string(std::ifstream& input_file_stream);
 
@@ -40,10 +40,17 @@ public:
     std::vector<Group> get_token_vector();
 
 private:
-    std::vector<Group> v;
 
-    std::string file_string;
+    // Output of lexer vector of Groups
+    std::vector<Group> v;
     
-    size_t index;
-    size_t line_number;
+    // Vector of strings, each element holds one line
+    std::vector<std::string> file_strings;
+    
+    // Hashmap of keywords (multichar strings) 
+    std::map<std::string, TokenType> keyword_map;
+    
+    // Vector storing corresponding line index 
+    size_t row_idx;
+    size_t col_idx;
 };
