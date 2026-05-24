@@ -57,33 +57,32 @@ void Lexer::scan(){
                     buffer.push_back(_char);
 
                     i++;
-                    char _char = row_str[i];
+                    _char = row_str[i];
+                }
+                
+                for (auto& literal: keyword_map){
 
-                    if (buffer == "return"){
-
+                    if (buffer == literal.first){
+                        
                         Group s;
-                        s.token_type = TokenType::RETURN;
-                        s.literal = buffer;
+                        s.token_type = literal.second;
+                        s.literal = literal.first;
                         s.row_idx = row;
 
                         v.push_back(s);
                         buffer.clear();
                     }
 
-                    if (buffer == "fn"){
-
+                    else{ // Non keyword case
                         Group s;
-                        s.token_type = TokenType::FUNC;
+                        s.token_type = TokenType::IDENTIFIER;
                         s.literal = buffer;
                         s.row_idx = row;
-
-                        v.push_back(s);
                         buffer.clear();
                     }
-                    i--;
                 }
             }
-
+           
             else if (std::isspace(_char)){
              
                 while (isalpha(_char)){

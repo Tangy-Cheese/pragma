@@ -1,6 +1,8 @@
 #pragma once
 
 enum class TokenType{
+    
+    IDENTIFIER,
 
     //keywords
     FUNC, FOR, PARALLEL, ALLOC, RETURN, IF, ELIF, ELSE, PRINT,
