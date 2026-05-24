@@ -51,7 +51,7 @@ void Lexer::scan(){
             
             char _char = row_str[i];
             
-            if (std::isalpha(_char)){
+            if (isalpha(_char)){
                 while (isalpha(_char)){
 
                     buffer.push_back(_char);
@@ -78,24 +78,15 @@ void Lexer::scan(){
                         s.token_type = TokenType::IDENTIFIER;
                         s.literal = buffer;
                         s.row_idx = row;
+
+                        v.push_back(s);
                         buffer.clear();
                     }
                 }
             }
            
-            else if (std::isspace(_char)){
-             
-                while (isalpha(_char)){
-                    buffer.push_back(_char);
-
-                    i++;
-
-                    if (buffer == "return"){
-                        v.push_back(Group(TokenType::RETURN, "return", row));
-                        buffer.clear();
-                    }   
-                    i--;
-                }
+            else if (isspace(_char)){
+                i++; 
             }
 
             else if (std::isdigit(_char)){
@@ -104,17 +95,23 @@ void Lexer::scan(){
                     buffer.push_back(_char);
 
                     i++;
-
-                    if (buffer == "return"){
-                        v.push_back(Group(TokenType::RETURN, "return", row));
-                        buffer.clear();
-                    }   
+                    _char = row_str[i];
                 }
+
+                Group n;
+                n.token_type = TokenType::INT_LIT;
+                n.literal = buffer;
+                n.row_idx = row;
+                v.push_back(n);    
+                 
+                buffer.clear();
+                    
             }
-            
-            // identifiers/var names
-            else{         
-                while (isalpha(_char)){
+                
+    
+            else if (std::isdigit(_char)){
+             
+                while (isdigit(_char)){
                     buffer.push_back(_char);
 
                     i++;
