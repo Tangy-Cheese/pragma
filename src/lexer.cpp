@@ -38,7 +38,7 @@ void Lexer::conv_string(std::ifstream& input){
 }
 
 
-void Lexer::push_group(TokenType type, std::string lit, size_t row){
+void Lexer::push_token(TokenType type, std::string lit, size_t row){
     v.push_back({type, lit, row});
 }
 
@@ -72,14 +72,14 @@ void Lexer::scan(){
 
                     if (buffer == literal.first){
                         
-                        push_group(literal.second, literal.first, row);
+                        push_token(literal.second, literal.first, row);
                         buffer.clear();
                         goto skip;
                     }
                 }
 
                 // identifier case
-                push_group(TokenType::IDENTIFIER, buffer, row);
+                push_token(TokenType::IDENTIFIER, buffer, row);
                 buffer.clear();
 
                 skip: ;
@@ -99,7 +99,7 @@ void Lexer::scan(){
                     _char = row_str[i];
                 }
 
-                push_group(TokenType::INT_LIT, buffer, row);
+                push_token(TokenType::INT_LIT, buffer, row);
                 buffer.clear();
             }
                 
@@ -107,22 +107,22 @@ void Lexer::scan(){
             else{ 
                 switch (_char){            
                     case '(':
-                        push_group(TokenType::L_PAREN, "(", row);
+                        push_token(TokenType::L_PAREN, "(", row);
                         break;
                     case ')':
-                        push_group(TokenType::R_PAREN, ")", row);
+                        push_token(TokenType::R_PAREN, ")", row);
                         break;
                     case '{':
-                        push_group(TokenType::L_CURLY, "{", row);
+                        push_token(TokenType::L_CURLY, "{", row);
                         break;
                     case '}':
-                        push_group(TokenType::R_CURLY, "}", row);
+                        push_token(TokenType::R_CURLY, "}", row);
                         break;
                     case '+':
-                        push_group(TokenType::PLUS, "+", row);
+                        push_token(TokenType::PLUS, "+", row);
                         break;
                     case ',':
-                        push_group(TokenType::COMMA, ",", row);
+                        push_token(TokenType::COMMA, ",", row);
                         break;
                 }
                 i++;
@@ -130,6 +130,6 @@ void Lexer::scan(){
         }
     }
 }
-std::vector<Group> Lexer::get_token_vector(){
+std::vector<Token> Lexer::get_token_vector(){
     return v;
 }

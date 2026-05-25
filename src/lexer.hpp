@@ -8,14 +8,14 @@
 #include <fstream>
 #include <map>
 
-struct Group{
+struct Token{
 
     TokenType token_type;
     std::string literal;
     size_t row_idx;
 
     // Equals operator overload
-    bool operator==(const Group& other) const{
+    bool operator==(const Token& other) const{
         return token_type == other.token_type && literal == other.literal && row_idx == other.row_idx;
     }
 };
@@ -38,7 +38,7 @@ public:
      * @param lit 
      * @param row 
      */
-    void push_group(TokenType type, std::string lit, size_t row);
+    void push_token(TokenType type, std::string lit, size_t row);
 
     /**
      * @brief Function to scan the string and separate into tokens.
@@ -52,12 +52,12 @@ public:
      *
      * @param v Token vector.
      */
-    std::vector<Group> get_token_vector();
+    std::vector<Token> get_token_vector();
 
 private:
 
-    // Output of lexer vector of Groups
-    std::vector<Group> v;
+    // Output of lexer vector of tokens
+    std::vector<Token> v;
     
     // Vector of strings, each element holds one line
     std::vector<std::string> file_strings;

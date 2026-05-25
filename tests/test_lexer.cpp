@@ -24,14 +24,14 @@ TEST_CASE("Test add function"){
     REQUIRE(tokens.size() == 13);
 }
 
-TEST_CASE("Matching group vectors"){
+TEST_CASE("Matching token vectors"){
 
-    Lexer group_vec("tests/lex_files/test_group_vector.pragma");
+    Lexer token_vec("tests/lex_files/test_token_vector.pragma");
     
-    group_vec.scan();
-    auto tokens = group_vec.get_token_vector();
+    token_vec.scan();
+    auto tokens = token_vec.get_token_vector();
     
-    std::vector<Group> expected{
+    std::vector<Token> expected{
         
     {TokenType::FUNC, "fn", 0},
     {TokenType::L_PAREN, "(", 0},
