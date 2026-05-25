@@ -13,6 +13,11 @@ struct Group{
     TokenType token_type;
     std::string literal;
     size_t row_idx;
+
+    // Equals operator overload
+    bool operator==(const Group& other) const{
+        return token_type == other.token_type && literal == other.literal && row_idx == other.row_idx;
+    }
 };
 
 class Lexer{

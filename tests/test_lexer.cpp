@@ -1,9 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
+#include <vector>
 #include "../src/lexer.hpp"
 
 TEST_CASE("Test single chars"){
     
-    Lexer l("tests/test_char.pragma");
+    Lexer l("tests/lex_files/test_char.pragma");
 
     l.scan();
     auto tokens = l.get_token_vector();
@@ -15,10 +16,38 @@ TEST_CASE("Test single chars"){
 
 TEST_CASE("Test add function"){
     
-    Lexer add("tests/test_add.pragma");
+    Lexer add("tests/lex_files/test_add.pragma");
 
     add.scan();
     auto tokens = add.get_token_vector();
     
     REQUIRE(tokens.size() == 13);
+}
+
+TEST_CASE("Matching group vectors"){
+
+    Lexer group_vec("tests/lex_files/test_group_vector.pragma");
+    
+    group_vec.scan();
+    auto tokens = group_vec.get_token_vector();
+    
+    std::vector<Group> expected{
+        
+    {TokenType::FUNC, "fn", 0},
+    {TokenType::L_PAREN, "(", 0},
+    {TokenType::L_PAREN, "(", 0},
+    {TokenType::R_PAREN, ")", 0},
+    {TokenType::IDENTIFIER, "hello", 2},
+    {TokenType::IDENTIFIER, "world", 2},
+    {TokenType::PLUS, "+", 2},
+    {TokenType::COMMA, ",", 2},
+    {TokenType::L_PAREN, "(", 2},
+    {TokenType::R_PAREN, ")", 2},
+    {TokenType::RETURN, "return", 2},
+    {TokenType::INT_LIT, "0", 2},
+    {TokenType::PLUS, "+", 4},
+    {TokenType::INT_LIT, "2", 4},
+    };
+
+    REQUIRE(tokens == expected); 
 }
