@@ -2,6 +2,7 @@
 #include "tokenizer.hpp"
 
 #include <cctype>
+#include <cstddef>
 #include <iostream>
 #include <fstream>
 
@@ -36,6 +37,12 @@ void Lexer::conv_string(std::ifstream& input){
     }
 }
 
+
+void Lexer::push_group(TokenType type, std::string lit, size_t row){
+    v.push_back({type, lit, row});
+}
+
+
 void Lexer::scan(){
     
     for (int row=0; row<Lexer::file_strings.size(); row++) {
@@ -47,12 +54,13 @@ void Lexer::scan(){
         std::string row_str = Lexer::file_strings[row];
         std::string buffer;
 
-        for (int i=0; i<N; i++){
+        int i = 0;
+        while (i<N){
             
             char _char = row_str[i];
             
             if (isalpha(_char)){
-                while (isalpha(_char)){
+                while (isalpha(_char) && i<=N){
 
                     buffer.push_back(_char);
 
@@ -64,69 +72,64 @@ void Lexer::scan(){
 
                     if (buffer == literal.first){
                         
-                        Group s;
-                        s.token_type = literal.second;
-                        s.literal = literal.first;
-                        s.row_idx = row;
-
-                        v.push_back(s);
+                        push_group(literal.second, literal.first, row);
                         buffer.clear();
-                    }
-
-                    else{ // Non keyword case
-                        Group s;
-                        s.token_type = TokenType::IDENTIFIER;
-                        s.literal = buffer;
-                        s.row_idx = row;
-
-                        v.push_back(s);
-                        buffer.clear();
+                        goto skip;
                     }
                 }
+
+                // identifier case
+                push_group(TokenType::IDENTIFIER, buffer, row);
+                buffer.clear();
+
+                skip: ;
             }
            
             else if (isspace(_char)){
                 i++; 
+                _char = row_str[i];
             }
 
             else if (std::isdigit(_char)){
              
-                while (isdigit(_char)){
+                while (isdigit(_char) && i<=N){
                     buffer.push_back(_char);
 
                     i++;
                     _char = row_str[i];
                 }
 
-                Group n;
-                n.token_type = TokenType::INT_LIT;
-                n.literal = buffer;
-                n.row_idx = row;
-                v.push_back(n);    
-                 
+                push_group(TokenType::INT_LIT, buffer, row);
                 buffer.clear();
-                    
             }
                 
     
-            else if (std::isdigit(_char)){
-             
-                while (isdigit(_char)){
-                    buffer.push_back(_char);
-
-                    i++;
-
-                    if (buffer == "return"){
-                        v.push_back(Group(TokenType::RETURN, "return", row));
-                        buffer.clear();
-                    }   
+            else{ 
+                switch (_char){            
+                    case '(':
+                        push_group(TokenType::L_PAREN, "(", row);
+                        break;
+                    case ')':
+                        push_group(TokenType::R_PAREN, ")", row);
+                        break;
+                    case '{':
+                        push_group(TokenType::L_CURLY, "{", row);
+                        break;
+                    case '}':
+                        push_group(TokenType::R_CURLY, "}", row);
+                        break;
+                    case '+':
+                        push_group(TokenType::PLUS, "+", row);
+                        break;
+                    case ',':
+                        push_group(TokenType::COMMA, ",", row);
+                        break;
                 }
+                i++;
             }
         }
     }
 }
-
-
 std::vector<Group> Lexer::get_token_vector(){
     return v;
 }

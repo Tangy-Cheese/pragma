@@ -12,4 +12,7 @@ enum class TokenType{
     
     //literals
     INT_LIT, CHAR_LIT, FLOAT_LIT, STRING_LIT,
+
+    //synatxical symbols
+    R_PAREN, L_PAREN, R_CURLY, L_CURLY, COMMA,
 };

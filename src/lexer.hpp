@@ -2,6 +2,7 @@
 
 #include "tokenizer.hpp"
 #include <cstddef>
+#include <iterator>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -24,6 +25,15 @@ public:
      * @brief Convert the .pragma file to a vector of long strings indexed by row number.
      */
     void conv_string(std::ifstream& input_file_stream);
+
+    /**
+     * @brief 
+     *
+     * @param type
+     * @param lit 
+     * @param row 
+     */
+    void push_group(TokenType type, std::string lit, size_t row);
 
     /**
      * @brief Function to scan the string and separate into tokens.
