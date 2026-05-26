@@ -16,11 +16,26 @@ struct var_node;
 class Parser{
 public:
     
-    Parser(std::vector<TokenType> token_vector);
+    Parser(std::vector<Token> token_vector);
     ~Parser();
 
-    TokenType peek();
+    /**
+     * @brief Returns whatever the current element is pointing at.
+     *
+     * @return Token of the current element.
+     */
+    Token peek();
+
+    /**
+     * @brief Adnaces the curr_element counter.
+     */
     void advance();
+    
+    /**
+     * @brief Checking for expected syntax: braces, paranthesis etc.
+     *
+     * @param expected TokenType we expect from the curr_element.
+     */
     void expect(TokenType expected);
 
     void funcparse();
