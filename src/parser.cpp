@@ -47,10 +47,8 @@ std::unique_ptr<func_node> Parser::funcparse(){
         expect(TokenType::L_PAREN);
 
         starting_node->param_ptrs = paramparse();
+
         expect(TokenType::R_PAREN);
-
-        advance();
-
         expect(TokenType::L_CURLY);
 
         starting_node->block_ptr = blockparse();

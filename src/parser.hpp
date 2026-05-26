@@ -88,7 +88,6 @@ struct bin_expr_node: public AST_node{
 };
 
 struct var_node: public AST_node{
-    std::string name;
 };
 
 

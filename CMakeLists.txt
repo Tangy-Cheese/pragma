@@ -14,7 +14,11 @@ find_package(Catch2 3 REQUIRED)
 add_library(LexerLib STATIC src/lexer.cpp)
 target_include_directories(LexerLib PUBLIC src)
 
-add_executable(pragma src/main.cpp)
-target_link_libraries(pragma PRIVATE LexerLib OpenMP::OpenMP_CXX)
+add_library(ParserLib STATIC src/parser.cpp)
+target_include_directories(ParserLib PUBLIC src)
+target_link_libraries(ParserLib PRIVATE LexerLib)
+
+add_executable(pragc src/main.cpp)
+target_link_libraries(pragc PRIVATE LexerLib ParserLib OpenMP::OpenMP_CXX)
 
 add_subdirectory(tests)
