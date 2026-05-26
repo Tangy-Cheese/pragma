@@ -70,7 +70,6 @@ struct func_node: public AST_node{
 };
 
 struct param_node: public AST_node{
-    std::string name;
 };
 
 struct block_node: public AST_node{

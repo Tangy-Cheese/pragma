@@ -71,12 +71,17 @@ std::vector<std::unique_ptr<param_node>> Parser::paramparse(){
 
     while (peek().token_type != TokenType::R_PAREN){
 
-        
-        param_ptrs.pushback(std::unique_ptr<param_node>) 
-        expected(TokenType::COMMA);
+        if (peek().token_type == TokenType::COMMA){
+            advance();
+        }
 
+        std::unique_ptr<param_node> p_node = std::make_unique<param_node>();
+
+        p_node->token = peek();
+
+        param_ptrs.push_back(std::move(p_node));
+        advance();
     }
-
     return param_ptrs;
 }
 
