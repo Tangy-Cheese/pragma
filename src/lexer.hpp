@@ -2,7 +2,6 @@
 
 #include "tokenizer.hpp"
 #include <cstddef>
-#include <iterator>
 #include <vector>
 #include <string>
 #include <fstream>
