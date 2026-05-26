@@ -7,6 +7,7 @@
 #include <vector>
 
 // forward decs
+struct func_node;
 struct return_node;
 struct param_node;
 struct block_node;
@@ -38,9 +39,19 @@ public:
      */
     void expect(TokenType expected);
 
-    void funcparse();
-    void blockparse();
-    void returnparse();
+    /**
+     * @brief Returns the pointer to the starting node of the functional abstract syntax tree.
+     */
+    std::unique_ptr<func_node> funcparse();
+
+    /**
+     * @brief Returns a vector of pointers to param nodes. Remember they are ending nodes so having them
+     *  as a vector is fine.
+     */
+    std::vector<std::unique_ptr<param_node>> paramparse();
+
+    std::unique_ptr<block_node> blockparse();
+    std::unique_ptr<return_node> returnparse();
     
 private:
     size_t curr_element;

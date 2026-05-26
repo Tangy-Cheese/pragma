@@ -2,7 +2,9 @@
 #include "lexer.hpp"
 #include "tokenizer.hpp"
 #include <iostream>
+#include <memory>
 #include <ostream>
+#include <string>
 #include <vector>
 
 Parser::Parser(std::vector<Token> token_vector){
@@ -26,21 +28,64 @@ void Parser::expect(TokenType expected){
         curr_element++;
     }
     else{
-        std::cerr << "Wrong syntax" << std::endl;
+        std::cerr << "Wrong syntax: row" + std::to_string(tokens[curr_element].row_idx) << std::endl;
     }
 }
     
-void Parser::funcparse(){
+std::unique_ptr<func_node> Parser::funcparse(){
     
     expect(TokenType::FUNC);
+    Token identifier = peek();
+
+    std::unique_ptr<func_node> starting_node = std::make_unique<func_node>();
+    
+    if (identifier.token_type == TokenType::IDENTIFIER){
+        
+        starting_node->token = identifier;
+
+        advance();
+        expect(TokenType::L_PAREN);
+
+        starting_node->param_ptrs = paramparse();
+        expect(TokenType::R_PAREN);
+
+        advance();
+
+        expect(TokenType::L_CURLY);
+
+        starting_node->block_ptr = blockparse();
+        advance();
+    }
+
+    else{
+        std::cerr << "Missing function name: row" + std::to_string(identifier.row_idx) << std::endl;
+    }
+
+    return starting_node;
+}
+
+std::vector<std::unique_ptr<param_node>> Parser::paramparse(){
+
+    // parses a list until right parenthesis
+    std::vector<std::unique_ptr<param_node>> param_ptrs;
+
+    while (peek().token_type != TokenType::R_PAREN){
+
+        
+        param_ptrs.pushback(std::unique_ptr<param_node>) 
+        expected(TokenType::COMMA);
+
+    }
+
+    return param_ptrs;
+}
+
+std::unique_ptr<block_node> Parser::blockparse(){
 
 }
 
-void Parser::blockparse(){
 
-}
-
-void Parser::returnparse(){
+std::unique_ptr<return_node> Parser::returnparse(){
 
 }
 
