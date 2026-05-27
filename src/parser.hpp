@@ -3,10 +3,10 @@
 #include "lexer.hpp"
 #include "tokenizer.hpp"
 #include <memory>
-#include <string>
 #include <vector>
 
 // forward decs
+struct AST_node;
 struct func_node;
 struct return_node;
 struct param_node;
@@ -52,7 +52,9 @@ public:
 
     std::unique_ptr<block_node> blockparse();
     std::unique_ptr<return_node> returnparse();
-    
+    std::unique_ptr<AST_node> parse_expr();
+    std::unique_ptr<AST_node> parse_primary();
+
 private:
     size_t curr_element;
     std::vector<Token> tokens;
@@ -74,6 +76,7 @@ struct param_node: public AST_node{
 
 struct block_node: public AST_node{
     std::unique_ptr<return_node> return_ptr;
+    std::vector<std::unique_ptr<AST_node>> body_ptrs;
 };
 
 struct return_node: public AST_node{
@@ -89,5 +92,4 @@ struct bin_expr_node: public AST_node{
 
 struct var_node: public AST_node{
 };
-
 
