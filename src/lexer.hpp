@@ -63,8 +63,4 @@ private:
     
     // Hashmap of keywords (multichar strings) 
     std::map<std::string, TokenType> keyword_map;
-    
-    // Vector storing corresponding line index 
-    size_t row_idx;
-    size_t col_idx;
 };

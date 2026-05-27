@@ -49,7 +49,6 @@ void Lexer::scan(){
            
         // Number of chars in each line
         size_t N = Lexer::file_strings[row].length(); 
-        row_idx = row;
         
         std::string row_str = Lexer::file_strings[row];
         std::string buffer;
@@ -72,14 +71,14 @@ void Lexer::scan(){
 
                     if (buffer == literal.first){
                         
-                        push_token(literal.second, literal.first, row);
+                        push_token(literal.second, literal.first, row+1);
                         buffer.clear();
                         goto skip;
                     }
                 }
 
                 // identifier case
-                push_token(TokenType::IDENTIFIER, buffer, row);
+                push_token(TokenType::IDENTIFIER, buffer, row+1);
                 buffer.clear();
 
                 skip: ;
@@ -99,7 +98,7 @@ void Lexer::scan(){
                     _char = row_str[i];
                 }
 
-                push_token(TokenType::INT_LIT, buffer, row);
+                push_token(TokenType::INT_LIT, buffer, row+1);
                 buffer.clear();
             }
                 
@@ -107,22 +106,22 @@ void Lexer::scan(){
             else{ 
                 switch (_char){            
                     case '(':
-                        push_token(TokenType::L_PAREN, "(", row);
+                        push_token(TokenType::L_PAREN, "(", row+1);
                         break;
                     case ')':
-                        push_token(TokenType::R_PAREN, ")", row);
+                        push_token(TokenType::R_PAREN, ")", row+1);
                         break;
                     case '{':
-                        push_token(TokenType::L_CURLY, "{", row);
+                        push_token(TokenType::L_CURLY, "{", row+1);
                         break;
                     case '}':
-                        push_token(TokenType::R_CURLY, "}", row);
+                        push_token(TokenType::R_CURLY, "}", row+1);
                         break;
                     case '+':
-                        push_token(TokenType::PLUS, "+", row);
+                        push_token(TokenType::PLUS, "+", row+1);
                         break;
                     case ',':
-                        push_token(TokenType::COMMA, ",", row);
+                        push_token(TokenType::COMMA, ",", row+1);
                         break;
                 }
                 i++;

@@ -1,6 +1,8 @@
 #include "parser.hpp"
 #include "lexer.hpp"
 #include "tokenizer.hpp"
+
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -84,11 +86,11 @@ std::vector<std::unique_ptr<param_node>> Parser::paramparse(){
 }
 
 std::unique_ptr<block_node> Parser::blockparse(){
-
+    return nullptr;
 }
 
 
 std::unique_ptr<return_node> Parser::returnparse(){
-
+    return nullptr;
 }
 

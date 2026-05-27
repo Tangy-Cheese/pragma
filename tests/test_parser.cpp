@@ -15,7 +15,7 @@ TEST_CASE("test function parser"){
     std::unique_ptr<func_node> temp = std::move(p.funcparse());
 
     // mock the Tokens at the nodes
-    Token func = {TokenType::FUNC, "add", 1};
+    Token func = {TokenType::IDENTIFIER, "add", 1};
     Token param_1= {TokenType::IDENTIFIER, "a", 1};
     Token param_2 = {TokenType::IDENTIFIER, "b", 1};
 

@@ -33,20 +33,20 @@ TEST_CASE("Matching token vectors"){
     
     std::vector<Token> expected{
         
-    {TokenType::FUNC, "fn", 0},
-    {TokenType::L_PAREN, "(", 0},
-    {TokenType::L_PAREN, "(", 0},
-    {TokenType::R_PAREN, ")", 0},
-    {TokenType::IDENTIFIER, "hello", 2},
-    {TokenType::IDENTIFIER, "world", 2},
-    {TokenType::PLUS, "+", 2},
-    {TokenType::COMMA, ",", 2},
-    {TokenType::L_PAREN, "(", 2},
-    {TokenType::R_PAREN, ")", 2},
-    {TokenType::RETURN, "return", 2},
-    {TokenType::INT_LIT, "0", 2},
-    {TokenType::PLUS, "+", 4},
-    {TokenType::INT_LIT, "2", 4},
+    {TokenType::FUNC, "fn", 1},
+    {TokenType::L_PAREN, "(", 1},
+    {TokenType::L_PAREN, "(", 1},
+    {TokenType::R_PAREN, ")", 1},
+    {TokenType::IDENTIFIER, "hello", 3},
+    {TokenType::IDENTIFIER, "world", 3},
+    {TokenType::PLUS, "+", 3},
+    {TokenType::COMMA, ",", 3},
+    {TokenType::L_PAREN, "(", 3},
+    {TokenType::R_PAREN, ")", 3},
+    {TokenType::RETURN, "return", 3},
+    {TokenType::INT_LIT, "0", 3},
+    {TokenType::PLUS, "+", 5},
+    {TokenType::INT_LIT, "2", 5},
     };
 
     REQUIRE(tokens == expected); 
