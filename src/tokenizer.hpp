@@ -9,10 +9,13 @@ enum class TokenType{
 
     //numerical operations
     PLUS, MINUS, ASTERISK, SLASH, PERCENT, EQUALS, GREATER, LESS, GREATEREQ, LESSEQ, NOTEQ, AND, OR,  
-    
+
     //literals
     INT_LIT, CHAR_LIT, FLOAT_LIT, STRING_LIT,
+    
+    //syntactical symbols
+    R_PAREN, L_PAREN, R_CURLY, L_CURLY, COMMA, COLON, R_BRACKET, L_BRACKET,
 
-    //synatxical symbols
-    R_PAREN, L_PAREN, R_CURLY, L_CURLY, COMMA,
+    //types
+    INT_TYPE, DOUBLE_TYPE, FLOAT_TYPE, BOOL_TYPE, COMPLEX_TYPE,
 };

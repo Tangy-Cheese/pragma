@@ -2,6 +2,8 @@
 
 #include "lexer.hpp"
 #include "tokenizer.hpp"
+#include "typecheck.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -64,7 +66,6 @@ private:
 
 struct AST_node{
     Token token;
-
     virtual ~AST_node()=default;
 };
 
@@ -82,7 +83,7 @@ struct block_node: public AST_node{
 };
 
 struct return_node: public AST_node{
-    std::unique_ptr<bin_expr_node> expr_ptr;
+    std::unique_ptr<AST_node> expr_ptr;
 };
 
 struct bin_expr_node: public AST_node{

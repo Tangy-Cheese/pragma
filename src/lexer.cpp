@@ -19,6 +19,12 @@ Lexer::Lexer(std::string file_name){
     keyword_map.insert({"return",TokenType::RETURN});
     keyword_map.insert({"fn",TokenType::FUNC});
     keyword_map.insert({"out",TokenType::PRINT});
+
+    //Types
+    keyword_map.insert({"int",TokenType::INT_TYPE});
+    keyword_map.insert({"complex",TokenType::COMPLEX_TYPE});
+    keyword_map.insert({"bool",TokenType::BOOL_TYPE});
+    keyword_map.insert({"double",TokenType::DOUBLE_TYPE});
 }
 
 Lexer::~Lexer(){}
@@ -122,6 +128,9 @@ void Lexer::scan(){
                         break;
                     case ',':
                         push_token(TokenType::COMMA, ",", row+1);
+                        break;
+                    case ':':
+                        push_token(TokenType::COLON, ":", row+1);
                         break;
                 }
                 i++;

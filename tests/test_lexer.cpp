@@ -21,7 +21,7 @@ TEST_CASE("Test add function"){
     add.scan();
     auto tokens = add.get_token_vector();
     
-    REQUIRE(tokens.size() == 13);
+    REQUIRE(tokens.size() == 19);
 }
 
 TEST_CASE("Matching token vectors"){
