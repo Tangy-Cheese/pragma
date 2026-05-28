@@ -118,29 +118,61 @@ std::unique_ptr<return_node> Parser::returnparse(){
     std::unique_ptr<return_node> return_ptr = std::make_unique<return_node>();
     
     expect(TokenType::RETURN);
-    return_ptr->expr_ptr = parse_expr();
+    return_ptr->expr_ptr = parse_expr(0);
 
     return return_ptr;
 }
 
 
-std::unique_ptr<AST_node> Parser::parse_expr(){
-
-    std::unique_ptr<AST_node> expr_ptr = std::make_unique<AST_node>();
-    
-    while (peek().token_type != TokenType::L_CURLY){
-        
-    }
-    return expr_ptr;
-}
-
-
 std::unique_ptr<AST_node> Parser::parse_primary(){
+    Token t = peek();
 
+    if (t.token_type == TokenType::IDENTIFIER){
+
+        auto node = std::make_unique<var_node>();
+        node->token = t;
+        advance();
+        return node;
+    }
+
+    std::cerr << "Unexpected token in expression: row " << t.row_idx << std::endl;
+    return nullptr;
 }
 
 
-std::unique_ptr<AST_node> Parser::parse_expr(){
+std::unique_ptr<AST_node> Parser::parse_expr(int min_prec){
+
+    auto left = parse_primary();
+
+    while (op_prec(peek().token_type) > min_prec){
+
+        Token op = peek();
+        advance();
+        auto right = parse_expr(op_prec(op.token_type));
+
+        auto bin = std::make_unique<bin_expr_node>();
+        bin->token = op;
+        bin->operand = op.token_type;
+        bin->var1_ptr = std::move(left);
+        bin->var2_ptr = std::move(right);
+        left = std::move(bin);
+    }
+
+    return left;
+}
 
 
+int Parser::op_prec(TokenType op_type){
+    switch (op_type) { 
+        default:
+            return -1;
+        case TokenType::PLUS: 
+            return 10;
+        case TokenType::MINUS: 
+            return 10;
+        case TokenType::SLASH: 
+            return 20;
+        case TokenType::ASTERISK: 
+            return 20;
+    }
 }

@@ -52,8 +52,10 @@ public:
 
     std::unique_ptr<block_node> blockparse();
     std::unique_ptr<return_node> returnparse();
-    std::unique_ptr<AST_node> parse_expr();
+    std::unique_ptr<AST_node> parse_expr(int min_prec);
     std::unique_ptr<AST_node> parse_primary();
+
+    int op_prec(TokenType op_type);
 
 private:
     size_t curr_element;
