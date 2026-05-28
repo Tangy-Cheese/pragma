@@ -126,6 +126,18 @@ void Lexer::scan(){
                     case '+':
                         push_token(TokenType::PLUS, "+", row+1);
                         break;
+                    case '-':
+                        push_token(TokenType::MINUS, "-", row+1);
+                        break;
+                    case '*':
+                        push_token(TokenType::ASTERISK, "*", row+1);
+                        break;
+                    case '/':
+                        push_token(TokenType::SLASH, "/", row+1);
+                        break;
+                    case '%':
+                        push_token(TokenType::PERCENT, "%", row+1);
+                        break;
                     case ',':
                         push_token(TokenType::COMMA, ",", row+1);
                         break;

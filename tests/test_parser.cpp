@@ -25,6 +25,10 @@ TEST_CASE("test function parser"){
 
     REQUIRE(params[0]->token == param_1);
     REQUIRE(params[1]->token == param_2);
+    
+    REQUIRE(params[0]->param_type == TokenType::INT_TYPE);
+    REQUIRE(params[1]->param_type == TokenType::INT_TYPE);
+
 
     //func->params/block->return->expr->var 
 

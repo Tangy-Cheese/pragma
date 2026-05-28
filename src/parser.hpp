@@ -2,7 +2,6 @@
 
 #include "lexer.hpp"
 #include "tokenizer.hpp"
-#include "typecheck.hpp"
 
 #include <memory>
 #include <vector>
@@ -72,9 +71,12 @@ struct AST_node{
 struct func_node: public AST_node{
     std::vector<std::unique_ptr<param_node>> param_ptrs;
     std::unique_ptr<block_node> block_ptr;
+
+    TokenType return_type;
 };
 
 struct param_node: public AST_node{
+    TokenType param_type;
 };
 
 struct block_node: public AST_node{

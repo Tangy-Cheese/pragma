@@ -50,6 +50,13 @@ std::unique_ptr<func_node> Parser::funcparse(){
         starting_node->token = identifier;
 
         advance();
+        expect(TokenType::COLON);
+
+        //need syntax checker here
+        
+        starting_node->return_type = peek().token_type;
+        advance();
+
         expect(TokenType::L_PAREN);
 
         starting_node->param_ptrs = paramparse();
@@ -84,8 +91,13 @@ std::vector<std::unique_ptr<param_node>> Parser::paramparse(){
 
         p_node->token = peek();
 
-        param_ptrs.push_back(std::move(p_node));
         advance();
+        expect(TokenType::COLON);
+
+        p_node->param_type = peek().token_type;
+        advance();
+
+        param_ptrs.push_back(std::move(p_node));
     }
     return param_ptrs;
 }
