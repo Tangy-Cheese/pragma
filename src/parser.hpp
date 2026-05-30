@@ -51,11 +51,34 @@ public:
      */
     std::vector<std::unique_ptr<param_node>> paramparse();
 
+    /**
+     * @brief 
+     */
     std::unique_ptr<block_node> blockparse();
+
+    /**
+     * @brief 
+     */
     std::unique_ptr<return_node> returnparse();
+
+    /**
+     * @brief 
+     *
+     * @param min_prec 
+     */
     std::unique_ptr<AST_node> parse_expr(int min_prec);
+
+    /**
+     * @brief 
+     */
     std::unique_ptr<AST_node> parse_primary();
 
+    /**
+     * @brief 
+     *
+     * @param op_type 
+     * @return 
+     */
     int op_prec(TokenType op_type);
 
 private:
