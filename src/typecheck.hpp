@@ -3,6 +3,7 @@
 #include "parser.hpp"
 #include <memory>
 #include <unordered_map>
+#include <optional>
 
 class TypeChecker{
 
@@ -30,6 +31,6 @@ private:
      *
      * @return 
      */
-    TokenType check_expr(AST_node*);
+    std::optional<TokenType> check_expr(AST_node*);
 };
 
