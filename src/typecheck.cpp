@@ -1,6 +1,7 @@
 #include "typecheck.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
+
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -16,7 +17,29 @@ void TypeChecker::checker(){
 }
 
 void TypeChecker::check_func(func_node* ptr){
-    check_expr(ptr);
+
+    auto& param_vec = ptr->param_ptrs;
+
+    //Fill env with param members
+    for (auto& param: param_vec){
+        env.insert({param->token.literal, param->param_type});
+    }
+
+    // TODO(human): walk ptr->block_ptr->return_ptr->expr_ptr, check_expr on it,
+    //              compare result type against ptr->return_type
+    
+    auto& expression_pointer =  ptr->block_ptr->return_ptr->expr_ptr;
+    std::optional<TokenType> expr_type = check_expr(expression_pointer.get());
+    
+    if (expr_type == std::nullopt){
+        std::cerr << "This is just wrong" << std::endl;
+        exit(1);
+    }
+
+    if (ptr->return_type != expr_type){
+        std::cerr << "Type mismatch" << std::endl;
+        exit(1);
+    }
 }
 
 std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
