@@ -4,7 +4,9 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <unordered_map>
 
 class CodeGenerator{
 
@@ -19,6 +21,9 @@ public:
 
     std::unique_ptr<func_node> starting_node;
 
+    // Type environment from TypeChecker::get_env(), keyed by variable name
+    std::unordered_map<std::string, TokenType> env;
+
     // Mappings
     std::map<TokenType, std::string> type_string;
     std::map<TokenType, std::string> operator_string;
@@ -27,6 +32,9 @@ private:
 
     // Output file stream
     std::ofstream out_stream;
+
+    // Local vars already declared in the current function
+    std::set<std::string> declared_vars;
 
     /**
      * @brief Generates C code for a function node and writes it to out_stream.
@@ -37,6 +45,12 @@ private:
      * @brief Generates C code for a block node's statements.
      */
     void generate_block(block_node*);
+
+    /**
+     * @brief Generates a C assignment statement from an assign_node, declaring
+     *  the variable's type on its first assignment.
+     */
+    void generate_assign(assign_node*);
 
     /**
      * @brief Generates a C return statement from a return_node.

@@ -14,6 +14,7 @@ struct param_node;
 struct block_node;
 struct bin_expr_node;
 struct var_node;
+struct assign_node;
 
 class Parser{
 public:
@@ -61,6 +62,11 @@ public:
      * @brief Parses a return statement into a return_node.
      */
     std::unique_ptr<return_node> returnparse();
+
+    /**
+     * @brief Parses an assignment statement into an assign_node.
+     */
+    std::unique_ptr<assign_node> assignparse();
 
     /**
      * @brief Parses an expression using precedence climbing.
@@ -120,5 +126,9 @@ struct bin_expr_node: public AST_node{
 };
 
 struct var_node: public AST_node{
+};
+
+struct assign_node: public AST_node{
+    std::unique_ptr<AST_node> expr_ptr;
 };
 

@@ -2,6 +2,7 @@
 
 #include "parser.hpp"
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <optional>
 
@@ -16,6 +17,13 @@ public:
      * @brief Runs check_func on member.
      */
     void checker();
+
+    /**
+     * @brief Read-only access to the type environment built up during checking.
+     *
+     * @return Map from variable name to inferred/declared type.
+     */
+    const std::unordered_map<std::string, TokenType>& get_env() const;
 
 private:
     std::unique_ptr<func_node> root;

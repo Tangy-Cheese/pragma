@@ -145,6 +145,9 @@ void Lexer::scan(){
                     case ':':
                         push_token(TokenType::COLON, ":", row+1);
                         break;
+                    case '=':
+                        push_token(TokenType::EQUALS, "=", row+1);
+                        break;
                 }
                 i++;
             }

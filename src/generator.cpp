@@ -40,6 +40,12 @@ void CodeGenerator::generate(){
 
 void CodeGenerator::generate_func(func_node* ptr){
 
+    declared_vars.clear();
+
+    for (auto& param: ptr->param_ptrs){
+        declared_vars.insert(param->token.literal);
+    }
+
     out_stream << type_string[ptr->return_type] << " " << ptr->token.literal << "(";
 
     for (size_t i=0; i<ptr->param_ptrs.size(); i++){
@@ -62,7 +68,28 @@ void CodeGenerator::generate_block(block_node* ptr){
 
     // For loop parser?, conditional parser? currently empty on parser side too.
 
+    for (auto& stmt: ptr->body_ptrs){
+
+        if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
+            generate_assign(assign);
+        }
+    }
+
     generate_return(ptr->return_ptr.get());
+}
+
+
+void CodeGenerator::generate_assign(assign_node* ptr){
+
+    std::string name = ptr->token.literal;
+
+    if (declared_vars.count(name) == 0){
+        out_stream << "    " << type_string[env[name]] << " " << name << " = " << gen_expr(ptr->expr_ptr.get()) << ";\n";
+        declared_vars.insert(name);
+    }
+    else{
+        out_stream << "    " << name << " = " << gen_expr(ptr->expr_ptr.get()) << ";\n";
+    }
 }
 
 

@@ -24,7 +24,23 @@ void TypeChecker::check_func(func_node* ptr){
     for (auto& param: param_vec){
         env.insert({param->token.literal, param->param_type});
     }
-    
+
+    //Fill env with locally assigned members
+    for (auto& stmt: ptr->block_ptr->body_ptrs){
+
+        if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
+
+            std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
+
+            if (stmt_type == std::nullopt){
+                std::cerr << "This is just wrong" << std::endl;
+                exit(1);
+            }
+
+            env[assign->token.literal] = stmt_type.value();
+        }
+    }
+
     auto& expression_pointer =  ptr->block_ptr->return_ptr->expr_ptr;
     std::optional<TokenType> expr_type = check_expr(expression_pointer.get());
     
@@ -37,6 +53,10 @@ void TypeChecker::check_func(func_node* ptr){
         std::cerr << "Type mismatch" << std::endl;
         exit(1);
     }
+}
+
+const std::unordered_map<std::string, TokenType>& TypeChecker::get_env() const{
+    return env;
 }
 
 std::optional<TokenType> TypeChecker::check_expr(AST_node* node){

@@ -117,6 +117,9 @@ std::unique_ptr<block_node> Parser::blockparse(){
         if (peek().token_type == TokenType::RETURN){
             block_ptr->return_ptr = returnparse(); //Should push forward to return body
         }
+        else if (peek().token_type == TokenType::IDENTIFIER){
+            body_nodes.push_back(assignparse());
+        }
         else{
             std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
             advance();
@@ -137,6 +140,20 @@ std::unique_ptr<return_node> Parser::returnparse(){
     return_ptr->expr_ptr = parse_expr(0);
 
     return return_ptr;
+}
+
+
+std::unique_ptr<assign_node> Parser::assignparse(){
+
+    std::unique_ptr<assign_node> assign_ptr = std::make_unique<assign_node>();
+
+    assign_ptr->token = peek();
+    advance();
+
+    expect(TokenType::EQUALS);
+    assign_ptr->expr_ptr = parse_expr(0);
+
+    return assign_ptr;
 }
 
 
