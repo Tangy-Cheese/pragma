@@ -6,3 +6,6 @@ target_link_libraries(TestParser PRIVATE ParserLib Catch2::Catch2WithMain)
 
 add_executable(TestTypechecker test_typechecker.cpp ../src/typecheck.cpp)
 target_link_libraries(TestTypechecker PRIVATE ParserLib Catch2::Catch2WithMain)
+
+add_executable(TestGenerator test_generator.cpp ../src/typecheck.cpp)
+target_link_libraries(TestGenerator PRIVATE GeneratorLib Catch2::Catch2WithMain)
