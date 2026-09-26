@@ -25,6 +25,7 @@ Lexer::Lexer(std::string file_name){
     keyword_map.insert({"complex",TokenType::COMPLEX_TYPE});
     keyword_map.insert({"bool",TokenType::BOOL_TYPE});
     keyword_map.insert({"double",TokenType::DOUBLE_TYPE});
+    keyword_map.insert({"float",TokenType::FLOAT_TYPE});
 }
 
 Lexer::~Lexer(){}

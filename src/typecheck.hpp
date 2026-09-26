@@ -22,14 +22,15 @@ private:
     std::unordered_map<std::string, TokenType> env;
 
     /**
-     * @brief 
+     * @brief Type checks a function: binds param types into env, then checks
+     *  the return expression against the declared return type.
      */
     void check_func(func_node*);
 
     /**
-     * @brief 
+     * @brief Recursively type checks an expression node.
      *
-     * @return 
+     * @return Resulting type of the expression, or nullopt on error.
      */
     std::optional<TokenType> check_expr(AST_node*);
 };

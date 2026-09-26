@@ -52,32 +52,33 @@ public:
     std::vector<std::unique_ptr<param_node>> paramparse();
 
     /**
-     * @brief 
+     * @brief Parses statements up to the closing brace, returning a block_node
+     *  holding the block's return expression.
      */
     std::unique_ptr<block_node> blockparse();
 
     /**
-     * @brief 
+     * @brief Parses a return statement into a return_node.
      */
     std::unique_ptr<return_node> returnparse();
 
     /**
-     * @brief 
+     * @brief Parses an expression using precedence climbing.
      *
-     * @param min_prec 
+     * @param min_prec Minimum operator precedence to bind at this level.
      */
     std::unique_ptr<AST_node> parse_expr(int min_prec);
 
     /**
-     * @brief 
+     * @brief Parses a single primary expression (currently identifiers only).
      */
     std::unique_ptr<AST_node> parse_primary();
 
     /**
-     * @brief 
+     * @brief Returns the binding precedence of an operator token.
      *
-     * @param op_type 
-     * @return 
+     * @param op_type Token type to look up.
+     * @return Precedence value, higher binds tighter, or -1 if not an operator.
      */
     int op_prec(TokenType op_type);
 

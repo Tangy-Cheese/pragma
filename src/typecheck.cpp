@@ -24,9 +24,6 @@ void TypeChecker::check_func(func_node* ptr){
     for (auto& param: param_vec){
         env.insert({param->token.literal, param->param_type});
     }
-
-    // TODO(human): walk ptr->block_ptr->return_ptr->expr_ptr, check_expr on it,
-    //              compare result type against ptr->return_type
     
     auto& expression_pointer =  ptr->block_ptr->return_ptr->expr_ptr;
     std::optional<TokenType> expr_type = check_expr(expression_pointer.get());
@@ -47,7 +44,15 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
     if(auto* leaf = dynamic_cast<var_node*>(node)){
         
         if (leaf->token.token_type == TokenType::IDENTIFIER){
-            return env[leaf->token.literal];    
+
+            auto found = env.find(leaf->token.literal);
+
+            if (found == env.end()){
+                std::cerr << "Undeclared identifier: " << leaf->token.literal << std::endl;
+                return std::nullopt;
+            }
+
+            return found->second;
         }
 
         else{   

@@ -27,29 +27,29 @@ public:
     
     /**
      * @brief Convert the .pragma file to a vector of long strings indexed by row number.
+     *
+     * @param input_file_stream Input file stream to read lines from.
      */
     void conv_string(std::ifstream& input_file_stream);
 
     /**
-     * @brief 
+     * @brief Simply add the token to the token_vector
      *
-     * @param type
-     * @param lit 
-     * @param row 
+     * @param type Token type
+     * @param lit Literal string
+     * @param row Row of the string
      */
     void push_token(TokenType type, std::string lit, size_t row);
 
     /**
-     * @brief Function to scan the string and separate into tokens.
-     *
-     * @param fstring String which is being scanned.
+     * @brief Scans file_strings and separates each line into tokens.
      */
     void scan();
 
     /**
      * @brief Reading of the token vector.
      *
-     * @param v Token vector.
+     * @return Token vector produced by scan().
      */
     std::vector<Token> get_token_vector();
 

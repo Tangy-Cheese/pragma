@@ -111,11 +111,15 @@ std::unique_ptr<block_node> Parser::blockparse(){
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
     while (peek().token_type != TokenType::R_CURLY){
-        
+
         // For loop parser?, conditional parser? curerntly empty.
-        
+
         if (peek().token_type == TokenType::RETURN){
             block_ptr->return_ptr = returnparse(); //Should push forward to return body
+        }
+        else{
+            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            advance();
         }
     }
 
