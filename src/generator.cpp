@@ -38,7 +38,7 @@ CodeGenerator::~CodeGenerator(){}
 
 
 void CodeGenerator::generate(){
-    generate_func(starting_node.get());
+    generate_func(starting_node);
 }
 
 

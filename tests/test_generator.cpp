@@ -13,21 +13,17 @@ TEST_CASE("test codegen for assignment and for loop"){
     l.scan();
     auto tokens = l.get_token_vector();
 
-    // Separate parses for typecheck and codegen: each owns its own AST.
     Parser p(tokens);
     std::unique_ptr<func_node> ast = p.funcparse();
 
-    Parser p_check(tokens);
-    std::unique_ptr<func_node> ast_for_check = p_check.funcparse();
-
-    TypeChecker t(std::move(ast_for_check));
+    TypeChecker t(ast.get());
     t.checker();
 
     {
         // CodeGenerator's destructor closes out_stream, flushing to disk,
         // so it must go out of scope before output.c is read back below.
         CodeGenerator g;
-        g.starting_node = std::move(ast);
+        g.starting_node = ast.get();
         g.env = t.get_env();
         g.generate();
     }

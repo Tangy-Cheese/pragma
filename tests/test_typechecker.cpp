@@ -14,7 +14,7 @@ TEST_CASE("test function parser"){
 
     std::unique_ptr<func_node> starting_ptr = p.funcparse();
 
-    TypeChecker t(std::move(starting_ptr));
+    TypeChecker t(starting_ptr.get());
 
     // Not calling t.checker() yet: it reports errors via exit(1), which would
     // kill this whole test binary on this fixture's expected type mismatch.
@@ -33,7 +33,7 @@ TEST_CASE("test function typecheck true"){
 
     std::unique_ptr<func_node> starting_ptr = p.funcparse();
 
-    TypeChecker t(std::move(starting_ptr));
+    TypeChecker t(starting_ptr.get());
     t.checker();
 
     auto& env = t.get_env();

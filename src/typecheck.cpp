@@ -3,17 +3,16 @@
 #include "tokenizer.hpp"
 
 #include <iostream>
-#include <memory>
 #include <optional>
 
-TypeChecker::TypeChecker(std::unique_ptr<func_node> function_node){
-    root = std::move(function_node); 
+TypeChecker::TypeChecker(func_node* function_node){
+    root = function_node;
 }
 
 TypeChecker::~TypeChecker(){}
 
-void TypeChecker::checker(){    
-    check_func(root.get());
+void TypeChecker::checker(){
+    check_func(root);
 }
 
 void TypeChecker::check_func(func_node* ptr){

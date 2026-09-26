@@ -20,7 +20,7 @@ public:
      */
     void generate();
 
-    std::unique_ptr<func_node> starting_node;
+    func_node* starting_node;
 
     // Type environment from TypeChecker::get_env(), keyed by variable name
     std::unordered_map<std::string, TokenType> env;

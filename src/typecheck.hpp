@@ -1,7 +1,6 @@
 #pragma once
 
 #include "parser.hpp"
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <optional>
@@ -11,7 +10,7 @@ class TypeChecker{
 
 public:
 
-    TypeChecker(std::unique_ptr<func_node>);
+    TypeChecker(func_node*);
     ~TypeChecker();
 
     /**
@@ -27,7 +26,7 @@ public:
     const std::unordered_map<std::string, TokenType>& get_env() const;
 
 private:
-    std::unique_ptr<func_node> root;
+    func_node* root;
     std::unordered_map<std::string, TokenType> env;
 
     /**
