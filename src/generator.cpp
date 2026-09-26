@@ -21,6 +21,10 @@ CodeGenerator::CodeGenerator(){
     operator_string.insert({TokenType::SLASH, "/"});
     operator_string.insert({TokenType::PERCENT, "%"});
     operator_string.insert({TokenType::EQUALS, "="});
+    operator_string.insert({TokenType::PLUSEQ, "+="});
+    operator_string.insert({TokenType::MINUSEQ, "-="});
+    operator_string.insert({TokenType::ASTERISKEQ, "*="});
+    operator_string.insert({TokenType::SLASHEQ, "/="});
     operator_string.insert({TokenType::GREATER, ">"});
     operator_string.insert({TokenType::LESS, "<"});
     operator_string.insert({TokenType::GREATEREQ, ">="});
@@ -94,11 +98,13 @@ void CodeGenerator::generate_assign(assign_node* ptr){
     std::string name = ptr->token.literal;
 
     if (declared_vars.count(name) == 0){
+        // ptr->op is always EQUALS on a first declaration; typecheck rejects
+        // a compound assignment to an undeclared variable before this runs.
         out_stream << "    " << type_string[env[name]] << " " << name << " = " << gen_expr(ptr->expr_ptr.get()) << ";\n";
         declared_vars.insert(name);
     }
     else{
-        out_stream << "    " << name << " = " << gen_expr(ptr->expr_ptr.get()) << ";\n";
+        out_stream << "    " << name << " " << operator_string[ptr->op] << " " << gen_expr(ptr->expr_ptr.get()) << ";\n";
     }
 }
 

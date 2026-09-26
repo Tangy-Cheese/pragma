@@ -9,6 +9,7 @@ enum class TokenType{
 
     //numerical operations
     PLUS, MINUS, ASTERISK, SLASH, PERCENT, EQUALS, GREATER, LESS, GREATEREQ, LESSEQ, NOTEQ, AND, OR,
+    PLUSEQ, MINUSEQ, ASTERISKEQ, SLASHEQ,
 
     //literals
     INT_LIT, CHAR_LIT, FLOAT_LIT, STRING_LIT,

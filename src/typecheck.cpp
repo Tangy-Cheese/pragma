@@ -58,7 +58,24 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
                 exit(1);
             }
 
-            env[assign->token.literal] = stmt_type.value();
+            if (assign->op == TokenType::EQUALS){
+                env[assign->token.literal] = stmt_type.value();
+            }
+            else{
+                // Compound assignment (+=, -=, *=, /=) can't declare a new
+                // local: there's no existing value to combine with.
+                auto found = env.find(assign->token.literal);
+
+                if (found == env.end()){
+                    std::cerr << "Undeclared identifier: " << assign->token.literal << std::endl;
+                    exit(1);
+                }
+
+                if (found->second != stmt_type){
+                    std::cerr << "Type mismatch" << std::endl;
+                    exit(1);
+                }
+            }
         }
 
         else if (auto* for_stmt = dynamic_cast<for_node*>(stmt.get())){

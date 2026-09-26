@@ -127,16 +127,40 @@ void Lexer::scan(){
                         push_token(TokenType::R_CURLY, "}", row+1);
                         break;
                     case '+':
-                        push_token(TokenType::PLUS, "+", row+1);
+                        if (i+1<N && row_str[i+1]=='='){
+                            push_token(TokenType::PLUSEQ, "+=", row+1);
+                            i++;
+                        }
+                        else{
+                            push_token(TokenType::PLUS, "+", row+1);
+                        }
                         break;
                     case '-':
-                        push_token(TokenType::MINUS, "-", row+1);
+                        if (i+1<N && row_str[i+1]=='='){
+                            push_token(TokenType::MINUSEQ, "-=", row+1);
+                            i++;
+                        }
+                        else{
+                            push_token(TokenType::MINUS, "-", row+1);
+                        }
                         break;
                     case '*':
-                        push_token(TokenType::ASTERISK, "*", row+1);
+                        if (i+1<N && row_str[i+1]=='='){
+                            push_token(TokenType::ASTERISKEQ, "*=", row+1);
+                            i++;
+                        }
+                        else{
+                            push_token(TokenType::ASTERISK, "*", row+1);
+                        }
                         break;
                     case '/':
-                        push_token(TokenType::SLASH, "/", row+1);
+                        if (i+1<N && row_str[i+1]=='='){
+                            push_token(TokenType::SLASHEQ, "/=", row+1);
+                            i++;
+                        }
+                        else{
+                            push_token(TokenType::SLASH, "/", row+1);
+                        }
                         break;
                     case '%':
                         push_token(TokenType::PERCENT, "%", row+1);

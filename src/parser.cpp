@@ -153,7 +153,17 @@ std::unique_ptr<assign_node> Parser::assignparse(){
     assign_ptr->token = peek();
     advance();
 
-    expect(TokenType::EQUALS);
+    Token op_token = peek();
+
+    if (op_token.token_type != TokenType::EQUALS && op_token.token_type != TokenType::PLUSEQ &&
+        op_token.token_type != TokenType::MINUSEQ && op_token.token_type != TokenType::ASTERISKEQ &&
+        op_token.token_type != TokenType::SLASHEQ){
+        std::cerr << "Expected assignment operator: row " + std::to_string(op_token.row_idx) << std::endl;
+    }
+
+    assign_ptr->op = op_token.token_type;
+    advance();
+
     assign_ptr->expr_ptr = parse_expr(0);
 
     return assign_ptr;

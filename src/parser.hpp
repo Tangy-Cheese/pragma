@@ -65,7 +65,8 @@ public:
     std::unique_ptr<return_node> returnparse();
 
     /**
-     * @brief Parses an assignment statement into an assign_node.
+     * @brief Parses a plain or compound (+=, -=, *=, /=) assignment statement
+     *  into an assign_node.
      */
     std::unique_ptr<assign_node> assignparse();
 
@@ -136,6 +137,7 @@ struct var_node: public AST_node{
 
 struct assign_node: public AST_node{
     std::unique_ptr<AST_node> expr_ptr;
+    TokenType op; // EQUALS, PLUSEQ, MINUSEQ, ASTERISKEQ or SLASHEQ
 };
 
 struct for_node: public AST_node{
