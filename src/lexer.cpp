@@ -19,6 +19,8 @@ Lexer::Lexer(std::string file_name){
     keyword_map.insert({"return",TokenType::RETURN});
     keyword_map.insert({"fn",TokenType::FUNC});
     keyword_map.insert({"out",TokenType::PRINT});
+    keyword_map.insert({"for",TokenType::FOR});
+    keyword_map.insert({"in",TokenType::IN});
 
     //Types
     keyword_map.insert({"int",TokenType::INT_TYPE});
@@ -147,6 +149,15 @@ void Lexer::scan(){
                         break;
                     case '=':
                         push_token(TokenType::EQUALS, "=", row+1);
+                        break;
+                    case '.':
+                        if (i+1<N && row_str[i+1]=='.'){
+                            push_token(TokenType::RANGE, "..", row+1);
+                            i++;
+                        }
+                        else{
+                            std::cerr << "Unexpected character '.': row " << row+1 << std::endl;
+                        }
                         break;
                 }
                 i++;

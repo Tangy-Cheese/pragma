@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <optional>
+#include <vector>
 
 class TypeChecker{
 
@@ -34,6 +35,17 @@ private:
      *  the return expression against the declared return type.
      */
     void check_func(func_node*);
+
+    /**
+     * @brief Type checks a list of statements, growing env as locals are assigned.
+     */
+    void check_stmts(std::vector<std::unique_ptr<AST_node>>&);
+
+    /**
+     * @brief Type checks a for loop: checks its range bounds, binds the loop
+     *  variable as int, then checks its body statements.
+     */
+    void check_for(for_node*);
 
     /**
      * @brief Recursively type checks an expression node.

@@ -66,16 +66,26 @@ void CodeGenerator::generate_func(func_node* ptr){
 
 void CodeGenerator::generate_block(block_node* ptr){
 
-    // For loop parser?, conditional parser? currently empty on parser side too.
+    // conditional parser? currently empty on parser side too.
 
-    for (auto& stmt: ptr->body_ptrs){
+    generate_stmts(ptr->body_ptrs);
+
+    generate_return(ptr->return_ptr.get());
+}
+
+
+void CodeGenerator::generate_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
+
+    for (auto& stmt: stmts){
 
         if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
             generate_assign(assign);
         }
-    }
 
-    generate_return(ptr->return_ptr.get());
+        else if (auto* for_stmt = dynamic_cast<for_node*>(stmt.get())){
+            generate_for(for_stmt);
+        }
+    }
 }
 
 
@@ -90,6 +100,20 @@ void CodeGenerator::generate_assign(assign_node* ptr){
     else{
         out_stream << "    " << name << " = " << gen_expr(ptr->expr_ptr.get()) << ";\n";
     }
+}
+
+
+void CodeGenerator::generate_for(for_node* ptr){
+
+    std::string var = ptr->token.literal;
+
+    out_stream << "    for (int " << var << " = " << gen_expr(ptr->range_start_ptr.get())
+               << "; " << var << " < " << gen_expr(ptr->range_end_ptr.get())
+               << "; " << var << "++){\n";
+
+    generate_stmts(ptr->body_ptrs);
+
+    out_stream << "    }\n";
 }
 
 

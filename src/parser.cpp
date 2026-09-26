@@ -112,13 +112,16 @@ std::unique_ptr<block_node> Parser::blockparse(){
 
     while (peek().token_type != TokenType::R_CURLY){
 
-        // For loop parser?, conditional parser? curerntly empty.
+        // conditional parser? curerntly empty.
 
         if (peek().token_type == TokenType::RETURN){
             block_ptr->return_ptr = returnparse(); //Should push forward to return body
         }
         else if (peek().token_type == TokenType::IDENTIFIER){
             body_nodes.push_back(assignparse());
+        }
+        else if (peek().token_type == TokenType::FOR){
+            body_nodes.push_back(forparse());
         }
         else{
             std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
@@ -157,10 +160,51 @@ std::unique_ptr<assign_node> Parser::assignparse(){
 }
 
 
+std::unique_ptr<for_node> Parser::forparse(){
+
+    std::unique_ptr<for_node> for_ptr = std::make_unique<for_node>();
+
+    expect(TokenType::FOR);
+
+    for_ptr->token = peek();
+    advance();
+
+    expect(TokenType::IN);
+
+    for_ptr->range_start_ptr = parse_expr(0);
+    expect(TokenType::RANGE);
+    for_ptr->range_end_ptr = parse_expr(0);
+
+    expect(TokenType::L_CURLY);
+
+    std::vector<std::unique_ptr<AST_node>> body_nodes;
+
+    while (peek().token_type != TokenType::R_CURLY){
+
+        if (peek().token_type == TokenType::IDENTIFIER){
+            body_nodes.push_back(assignparse());
+        }
+        else if (peek().token_type == TokenType::FOR){
+            body_nodes.push_back(forparse());
+        }
+        else{
+            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            advance();
+        }
+    }
+
+    for_ptr->body_ptrs = std::move(body_nodes);
+
+    expect(TokenType::R_CURLY);
+
+    return for_ptr;
+}
+
+
 std::unique_ptr<AST_node> Parser::parse_primary(){
     Token t = peek();
 
-    if (t.token_type == TokenType::IDENTIFIER){
+    if (t.token_type == TokenType::IDENTIFIER || t.token_type == TokenType::INT_LIT || t.token_type == TokenType::FLOAT_LIT){
 
         auto node = std::make_unique<var_node>();
         node->token = t;

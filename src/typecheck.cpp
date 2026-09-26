@@ -25,21 +25,7 @@ void TypeChecker::check_func(func_node* ptr){
         env.insert({param->token.literal, param->param_type});
     }
 
-    //Fill env with locally assigned members
-    for (auto& stmt: ptr->block_ptr->body_ptrs){
-
-        if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
-
-            std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
-
-            if (stmt_type == std::nullopt){
-                std::cerr << "This is just wrong" << std::endl;
-                exit(1);
-            }
-
-            env[assign->token.literal] = stmt_type.value();
-        }
-    }
+    check_stmts(ptr->block_ptr->body_ptrs);
 
     auto& expression_pointer =  ptr->block_ptr->return_ptr->expr_ptr;
     std::optional<TokenType> expr_type = check_expr(expression_pointer.get());
@@ -57,6 +43,43 @@ void TypeChecker::check_func(func_node* ptr){
 
 const std::unordered_map<std::string, TokenType>& TypeChecker::get_env() const{
     return env;
+}
+
+void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
+
+    for (auto& stmt: stmts){
+
+        if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
+
+            std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
+
+            if (stmt_type == std::nullopt){
+                std::cerr << "This is just wrong" << std::endl;
+                exit(1);
+            }
+
+            env[assign->token.literal] = stmt_type.value();
+        }
+
+        else if (auto* for_stmt = dynamic_cast<for_node*>(stmt.get())){
+            check_for(for_stmt);
+        }
+    }
+}
+
+void TypeChecker::check_for(for_node* ptr){
+
+    std::optional<TokenType> start_type = check_expr(ptr->range_start_ptr.get());
+    std::optional<TokenType> end_type = check_expr(ptr->range_end_ptr.get());
+
+    if (start_type == std::nullopt || end_type == std::nullopt){
+        std::cerr << "This is just wrong" << std::endl;
+        exit(1);
+    }
+
+    env[ptr->token.literal] = TokenType::INT_TYPE;
+
+    check_stmts(ptr->body_ptrs);
 }
 
 std::optional<TokenType> TypeChecker::check_expr(AST_node* node){

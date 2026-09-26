@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class CodeGenerator{
 
@@ -47,10 +48,20 @@ private:
     void generate_block(block_node*);
 
     /**
+     * @brief Generates C code for a list of statements.
+     */
+    void generate_stmts(std::vector<std::unique_ptr<AST_node>>&);
+
+    /**
      * @brief Generates a C assignment statement from an assign_node, declaring
      *  the variable's type on its first assignment.
      */
     void generate_assign(assign_node*);
+
+    /**
+     * @brief Generates a C for loop from a for_node.
+     */
+    void generate_for(for_node*);
 
     /**
      * @brief Generates a C return statement from a return_node.
