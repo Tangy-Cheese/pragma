@@ -1,7 +1,7 @@
 #pragma once
 
 #include "parser.hpp"
-#include "typecheck.hpp"
+#include <fstream>
 #include <map>
 #include <memory>
 #include <string>
@@ -13,13 +13,25 @@ public:
     ~CodeGenerator();
 
     /**
-     * @brief Generates C code for a function node and writes it to output.c.
+     * @brief Runs generate_func on starting_node.
      */
-    void generate_func(func_node*);
+    void generate();
 
     std::unique_ptr<func_node> starting_node;
 
+    // Mappings
+    std::map<TokenType, std::string> type_string;
+    std::map<TokenType, std::string> operator_string;
+
 private:
+
+    // Output file stream
+    std::ofstream out_stream;
+
+    /**
+     * @brief Generates C code for a function node and writes it to out_stream.
+     */
+    void generate_func(func_node*);
 
     /**
      * @brief Generates C code for a block node's statements.
@@ -35,11 +47,4 @@ private:
      * @brief Generates a C expression string from an AST_node.
      */
     std::string gen_expr(AST_node*);
-
-public:
-
-    // Mappings
-    std::map<TokenType, std::string> type_string;
-    std::map<TokenType, std::string> operator_string;
-
 };

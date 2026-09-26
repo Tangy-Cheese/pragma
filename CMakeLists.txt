@@ -18,6 +18,10 @@ add_library(ParserLib STATIC src/parser.cpp)
 target_include_directories(ParserLib PUBLIC src)
 target_link_libraries(ParserLib PRIVATE LexerLib)
 
+add_library(GeneratorLib STATIC src/generator.cpp)
+target_include_directories(GeneratorLib PUBLIC src)
+target_link_libraries(GeneratorLib PRIVATE ParserLib)
+
 add_executable(pragc src/main.cpp)
 target_link_libraries(pragc PRIVATE LexerLib ParserLib OpenMP::OpenMP_CXX)
 
