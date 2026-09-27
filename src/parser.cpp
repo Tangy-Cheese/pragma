@@ -351,7 +351,9 @@ int Parser::op_prec(TokenType op_type){
             return 10;
         case TokenType::SLASH: 
             return 20;
-        case TokenType::ASTERISK: 
+        case TokenType::ASTERISK:
+            return 20;
+        case TokenType::PERCENT:
             return 20;
     }
 }

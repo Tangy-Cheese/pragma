@@ -1,0 +1,11 @@
+fn parsumbench:int (n:int){
+    a = alloc(int, n)
+    for i in 0..n {
+        a[i] = i
+    }
+    sum = 0
+    parallel i in 0..n {
+        sum += a[i] % 97
+    }
+    return sum
+}
