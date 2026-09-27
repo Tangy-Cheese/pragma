@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# Applies to every target defined below, including the ones in tests/.
+add_compile_options(-Wall -Wextra -Wpedantic)
+
 find_package(OpenMP REQUIRED)
 find_package(Catch2 3 REQUIRED)
 
