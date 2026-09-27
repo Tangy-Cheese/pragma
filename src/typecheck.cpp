@@ -30,15 +30,13 @@ void TypeChecker::check_func(func_node* ptr){
     std::optional<TokenType> expr_type = check_expr(expression_pointer.get());
     
     if (expr_type == std::nullopt){
-        std::cerr << "Error: could not determine the type of the return expression in function '"
-                   << ptr->token.literal << "' (row " << ptr->token.row_idx << ")." << std::endl;
-        exit(1);
+        diagnostics.add(ptr->token.row_idx, "could not determine the type of the return expression in function '"
+                         + ptr->token.literal + "'");
+        return;
     }
 
     if (ptr->return_type != expr_type){
-        std::cerr << "Error: function '" << ptr->token.literal
-                   << "' returns a value of the wrong type (row " << ptr->token.row_idx << ")." << std::endl;
-        exit(1);
+        diagnostics.add(ptr->token.row_idx, "function '" + ptr->token.literal + "' returns a value of the wrong type");
     }
 }
 
@@ -54,6 +52,10 @@ const std::unordered_map<parallel_node*, std::vector<std::string>>& TypeChecker:
     return parallel_clauses;
 }
 
+const DiagnosticCollector& TypeChecker::get_diagnostics() const{
+    return diagnostics;
+}
+
 void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
 
     for (auto& stmt: stmts){
@@ -66,26 +68,24 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
                 auto found = array_env.find(assign->token.literal);
 
                 if (found == array_env.end()){
-                    std::cerr << "Error: '" << assign->token.literal << "' is not a declared array (row "
-                               << assign->token.row_idx << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "'" + assign->token.literal + "' is not a declared array");
+                    continue;
                 }
 
                 std::optional<TokenType> index_type = check_expr(assign->index_ptr.get());
 
                 if (index_type != TokenType::INT_TYPE){
-                    std::cerr << "Error: array index for '" << assign->token.literal
-                               << "' must be of type int (row " << assign->token.row_idx << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "array index for '" + assign->token.literal
+                                     + "' must be of type int");
+                    continue;
                 }
 
                 std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
 
                 if (stmt_type != found->second){
-                    std::cerr << "Error: value assigned to '" << assign->token.literal
-                               << "[...]' does not match its element type (row " << assign->token.row_idx
-                               << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "value assigned to '" + assign->token.literal
+                                     + "[...]' does not match its element type");
+                    continue;
                 }
 
                 continue;
@@ -97,9 +97,9 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
                 std::optional<TokenType> size_type = check_expr(alloc->size_ptr.get());
 
                 if (size_type != TokenType::INT_TYPE){
-                    std::cerr << "Error: array size for '" << assign->token.literal
-                               << "' must be of type int (row " << assign->token.row_idx << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "array size for '" + assign->token.literal
+                                     + "' must be of type int");
+                    continue;
                 }
 
                 array_env[assign->token.literal] = alloc->elem_type;
@@ -109,9 +109,9 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
             std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
 
             if (stmt_type == std::nullopt){
-                std::cerr << "Error: could not determine the type of the expression assigned to '"
-                           << assign->token.literal << "' (row " << assign->token.row_idx << ")." << std::endl;
-                exit(1);
+                diagnostics.add(assign->token.row_idx, "could not determine the type of the expression assigned to '"
+                                 + assign->token.literal + "'");
+                continue;
             }
 
             if (assign->op == TokenType::EQUALS){
@@ -123,17 +123,15 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
                 auto found = env.find(assign->token.literal);
 
                 if (found == env.end()){
-                    std::cerr << "Error: '" << assign->token.literal
-                               << "' must be declared before it can be used with a compound assignment (row "
-                               << assign->token.row_idx << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "'" + assign->token.literal
+                                     + "' must be declared before it can be used with a compound assignment");
+                    continue;
                 }
 
                 if (found->second != stmt_type){
-                    std::cerr << "Error: value assigned to '" << assign->token.literal
-                               << "' does not match its declared type (row " << assign->token.row_idx
-                               << ")." << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "value assigned to '" + assign->token.literal
+                                     + "' does not match its declared type");
+                    continue;
                 }
             }
         }
@@ -154,9 +152,8 @@ void TypeChecker::check_for(for_node* ptr){
     std::optional<TokenType> end_type = check_expr(ptr->range_end_ptr.get());
 
     if (start_type == std::nullopt || end_type == std::nullopt){
-        std::cerr << "Error: could not determine the type of the loop range for '" << ptr->token.literal
-                   << "' (row " << ptr->token.row_idx << ")." << std::endl;
-        exit(1);
+        diagnostics.add(ptr->token.row_idx, "could not determine the type of the loop range for '"
+                         + ptr->token.literal + "'");
     }
 
     env[ptr->token.literal] = TokenType::INT_TYPE;
@@ -170,9 +167,8 @@ void TypeChecker::check_parallel(parallel_node* ptr){
     std::optional<TokenType> end_type = check_expr(ptr->range_end_ptr.get());
 
     if (start_type == std::nullopt || end_type == std::nullopt){
-        std::cerr << "Error: could not determine the type of the parallel loop range for '"
-                   << ptr->token.literal << "' (row " << ptr->token.row_idx << ")." << std::endl;
-        exit(1);
+        diagnostics.add(ptr->token.row_idx, "could not determine the type of the parallel loop range for '"
+                         + ptr->token.literal + "'");
     }
 
     env[ptr->token.literal] = TokenType::INT_TYPE;
@@ -195,10 +191,8 @@ void TypeChecker::check_parallel(parallel_node* ptr){
             bool unique_index = idx_var && idx_var->token.literal == ptr->token.literal;
 
             if (!unique_index){
-                std::cerr << "Error: array write index must be exactly the loop variable '"
-                           << ptr->token.literal << "' for this parallel loop to be provably safe (row "
-                           << assign->token.row_idx << ")." << std::endl;
-                exit(1);
+                diagnostics.add(assign->token.row_idx, "array write index must be exactly the loop variable '"
+                                 + ptr->token.literal + "' for this parallel loop to be provably safe");
             }
         }
         else{
@@ -212,11 +206,9 @@ void TypeChecker::check_parallel(parallel_node* ptr){
                     clauses.push_back("reduction(*:" + assign->token.literal + ")");
                 }
                 else{
-                    std::cerr << "Error: '" << assign->token.literal
-                              << "' is written without a reduction operator inside a parallel loop (row "
-                              << assign->token.row_idx << "). Use += or *= to combine into it safely."
-                              << std::endl;
-                    exit(1);
+                    diagnostics.add(assign->token.row_idx, "'" + assign->token.literal
+                                     + "' is written without a reduction operator inside a parallel loop. "
+                                       "Use += or *= to combine into it safely");
                 }
             }
             // else: name is new here, becomes a loop-body-local declaration in
@@ -238,8 +230,7 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
             auto found = env.find(leaf->token.literal);
 
             if (found == env.end()){
-                std::cerr << "Error: '" << leaf->token.literal << "' is not declared (row "
-                           << leaf->token.row_idx << ")." << std::endl;
+                diagnostics.add(leaf->token.row_idx, "'" + leaf->token.literal + "' is not declared");
                 return std::nullopt;
             }
 
@@ -256,8 +247,7 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
                     return TokenType::FLOAT_TYPE;   
 
                 default:
-                    std::cerr << "Error: unsupported literal in expression (row "
-                               << leaf->token.row_idx << ")." << std::endl;
+                    diagnostics.add(leaf->token.row_idx, "unsupported literal in expression");
             }
         }
     }
@@ -267,16 +257,14 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
         auto found = array_env.find(idx->token.literal);
 
         if (found == array_env.end()){
-            std::cerr << "Error: '" << idx->token.literal << "' is not a declared array (row "
-                       << idx->token.row_idx << ")." << std::endl;
+            diagnostics.add(idx->token.row_idx, "'" + idx->token.literal + "' is not a declared array");
             return std::nullopt;
         }
 
         std::optional<TokenType> index_type = check_expr(idx->index_ptr.get());
 
         if (index_type != TokenType::INT_TYPE){
-            std::cerr << "Error: array index for '" << idx->token.literal << "' must be of type int (row "
-                       << idx->token.row_idx << ")." << std::endl;
+            diagnostics.add(idx->token.row_idx, "array index for '" + idx->token.literal + "' must be of type int");
             return std::nullopt;
         }
 
@@ -293,8 +281,7 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
             return var1_branch;
         }
 
-        std::cerr << "Error: mismatched operand types around '" << bin->token.literal << "' (row "
-                   << bin->token.row_idx << ")." << std::endl;
+        diagnostics.add(bin->token.row_idx, "mismatched operand types around '" + bin->token.literal + "'");
     }
     
     return std::nullopt;

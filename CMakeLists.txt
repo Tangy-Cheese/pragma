@@ -11,6 +11,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(OpenMP REQUIRED)
 find_package(Catch2 3 REQUIRED)
 
+add_library(DiagnosticLib STATIC src/diagnostic.cpp)
+target_include_directories(DiagnosticLib PUBLIC src)
+
 add_library(LexerLib STATIC src/lexer.cpp)
 target_include_directories(LexerLib PUBLIC src)
 
@@ -21,12 +24,13 @@ target_link_libraries(ParserLib PRIVATE LexerLib)
 add_library(TypecheckLib STATIC src/typecheck.cpp)
 target_include_directories(TypecheckLib PUBLIC src)
 target_link_libraries(TypecheckLib PRIVATE ParserLib)
+target_link_libraries(TypecheckLib PUBLIC DiagnosticLib)
 
 add_library(GeneratorLib STATIC src/generator.cpp)
 target_include_directories(GeneratorLib PUBLIC src)
 target_link_libraries(GeneratorLib PRIVATE ParserLib)
 
 add_executable(pragc src/main.cpp)
-target_link_libraries(pragc PRIVATE LexerLib ParserLib TypecheckLib GeneratorLib OpenMP::OpenMP_CXX)
+target_link_libraries(pragc PRIVATE LexerLib ParserLib TypecheckLib GeneratorLib DiagnosticLib OpenMP::OpenMP_CXX)
 
 add_subdirectory(tests)

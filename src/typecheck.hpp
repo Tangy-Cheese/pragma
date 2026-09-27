@@ -1,5 +1,6 @@
 #pragma once
 
+#include "diagnostic.hpp"
 #include "parser.hpp"
 #include <string>
 #include <unordered_map>
@@ -42,11 +43,21 @@ public:
      */
     const std::unordered_map<parallel_node*, std::vector<std::string>>& get_parallel_clauses() const;
 
+    /**
+     * @brief Diagnostics collected during checking, in place of exit(1) —
+     *  every error found is recorded here rather than killing the process
+     *  on the first one.
+     *
+     * @return Collector holding every diagnostic recorded so far.
+     */
+    const DiagnosticCollector& get_diagnostics() const;
+
 private:
     func_node* root;
     std::unordered_map<std::string, TokenType> env;
     std::unordered_map<std::string, TokenType> array_env;
     std::unordered_map<parallel_node*, std::vector<std::string>> parallel_clauses;
+    DiagnosticCollector diagnostics;
 
     /**
      * @brief Type checks a function: binds param types into env, then checks

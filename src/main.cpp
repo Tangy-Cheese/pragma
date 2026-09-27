@@ -40,6 +40,11 @@ int main(int argc, char** argv){
     TypeChecker t(ast.get());
     t.checker();
 
+    if (t.get_diagnostics().has_errors()){
+        t.get_diagnostics().print_all();
+        return 1;
+    }
+
     {
         CodeGenerator g;
         g.starting_node = ast.get();
