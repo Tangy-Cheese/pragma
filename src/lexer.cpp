@@ -22,6 +22,7 @@ Lexer::Lexer(std::string file_name){
     keyword_map.insert({"for",TokenType::FOR});
     keyword_map.insert({"in",TokenType::IN});
     keyword_map.insert({"alloc",TokenType::ALLOC});
+    keyword_map.insert({"parallel",TokenType::PARALLEL});
 
     //Types
     keyword_map.insert({"int",TokenType::INT_TYPE});

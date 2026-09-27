@@ -18,6 +18,7 @@ struct assign_node;
 struct for_node;
 struct alloc_node;
 struct index_node;
+struct parallel_node;
 
 class Parser{
 public:
@@ -76,6 +77,11 @@ public:
      * @brief Parses a for loop into a for_node.
      */
     std::unique_ptr<for_node> forparse();
+
+    /**
+     * @brief Parses a parallel loop into a parallel_node.
+     */
+    std::unique_ptr<parallel_node> parallelparse();
 
     /**
      * @brief Parses an `alloc(type, size)` call into an alloc_node.
@@ -159,6 +165,12 @@ struct index_node: public AST_node{
 };
 
 struct for_node: public AST_node{
+    std::unique_ptr<AST_node> range_start_ptr;
+    std::unique_ptr<AST_node> range_end_ptr;
+    std::vector<std::unique_ptr<AST_node>> body_ptrs;
+};
+
+struct parallel_node: public AST_node{
     std::unique_ptr<AST_node> range_start_ptr;
     std::unique_ptr<AST_node> range_end_ptr;
     std::vector<std::unique_ptr<AST_node>> body_ptrs;
