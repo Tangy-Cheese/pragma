@@ -14,3 +14,13 @@ add_executable(TestPragc test_pragc.cpp)
 target_link_libraries(TestPragc PRIVATE Catch2::Catch2WithMain)
 target_compile_definitions(TestPragc PRIVATE PRAGC_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pragc")
 add_dependencies(TestPragc pragc)
+
+# Tests open fixtures like tests/lex_files/... relative to the repo root, so
+# every test runs from there instead of ctest's default (the build directory).
+foreach(name Lexer Parser Typechecker Generator Pragc)
+    add_test(NAME ${name} COMMAND Test${name} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endforeach()
+
+# Generator and Pragc both write and read back ./output.c, so running them
+# concurrently under ctest -j would race on that one file.
+set_tests_properties(Generator Pragc PROPERTIES RUN_SERIAL TRUE)

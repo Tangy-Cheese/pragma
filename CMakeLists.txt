@@ -11,6 +11,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(OpenMP REQUIRED)
 find_package(Catch2 3 REQUIRED)
 
+enable_testing()
+
 add_library(DiagnosticLib STATIC src/diagnostic.cpp)
 target_include_directories(DiagnosticLib PUBLIC src)
 
