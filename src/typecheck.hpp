@@ -56,6 +56,13 @@ private:
     void check_for(for_node*);
 
     /**
+     * @brief Type checks a parallel loop: same as check_for for now. OMP
+     *  safety analysis (reduction detection, disallowed scalar writes) is a
+     *  separate later pass, not part of type checking.
+     */
+    void check_parallel(parallel_node*);
+
+    /**
      * @brief Recursively type checks an expression node.
      *
      * @return Resulting type of the expression, or nullopt on error.

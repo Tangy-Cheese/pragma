@@ -125,10 +125,29 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
         else if (auto* for_stmt = dynamic_cast<for_node*>(stmt.get())){
             check_for(for_stmt);
         }
+
+        else if (auto* parallel_stmt = dynamic_cast<parallel_node*>(stmt.get())){
+            check_parallel(parallel_stmt);
+        }
     }
 }
 
 void TypeChecker::check_for(for_node* ptr){
+
+    std::optional<TokenType> start_type = check_expr(ptr->range_start_ptr.get());
+    std::optional<TokenType> end_type = check_expr(ptr->range_end_ptr.get());
+
+    if (start_type == std::nullopt || end_type == std::nullopt){
+        std::cerr << "This is just wrong" << std::endl;
+        exit(1);
+    }
+
+    env[ptr->token.literal] = TokenType::INT_TYPE;
+
+    check_stmts(ptr->body_ptrs);
+}
+
+void TypeChecker::check_parallel(parallel_node* ptr){
 
     std::optional<TokenType> start_type = check_expr(ptr->range_start_ptr.get());
     std::optional<TokenType> end_type = check_expr(ptr->range_end_ptr.get());

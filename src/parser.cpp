@@ -123,6 +123,9 @@ std::unique_ptr<block_node> Parser::blockparse(){
         else if (peek().token_type == TokenType::FOR){
             body_nodes.push_back(forparse());
         }
+        else if (peek().token_type == TokenType::PARALLEL){
+            body_nodes.push_back(parallelparse());
+        }
         else{
             std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
             advance();
@@ -203,6 +206,9 @@ std::unique_ptr<for_node> Parser::forparse(){
         else if (peek().token_type == TokenType::FOR){
             body_nodes.push_back(forparse());
         }
+        else if (peek().token_type == TokenType::PARALLEL){
+            body_nodes.push_back(parallelparse());
+        }
         else{
             std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
             advance();
@@ -214,6 +220,50 @@ std::unique_ptr<for_node> Parser::forparse(){
     expect(TokenType::R_CURLY);
 
     return for_ptr;
+}
+
+
+std::unique_ptr<parallel_node> Parser::parallelparse(){
+
+    std::unique_ptr<parallel_node> parallel_ptr = std::make_unique<parallel_node>();
+
+    expect(TokenType::PARALLEL);
+
+    parallel_ptr->token = peek();
+    advance();
+
+    expect(TokenType::IN);
+
+    parallel_ptr->range_start_ptr = parse_expr(0);
+    expect(TokenType::RANGE);
+    parallel_ptr->range_end_ptr = parse_expr(0);
+
+    expect(TokenType::L_CURLY);
+
+    std::vector<std::unique_ptr<AST_node>> body_nodes;
+
+    while (peek().token_type != TokenType::R_CURLY){
+
+        if (peek().token_type == TokenType::IDENTIFIER){
+            body_nodes.push_back(assignparse());
+        }
+        else if (peek().token_type == TokenType::FOR){
+            body_nodes.push_back(forparse());
+        }
+        else if (peek().token_type == TokenType::PARALLEL){
+            body_nodes.push_back(parallelparse());
+        }
+        else{
+            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            advance();
+        }
+    }
+
+    parallel_ptr->body_ptrs = std::move(body_nodes);
+
+    expect(TokenType::R_CURLY);
+
+    return parallel_ptr;
 }
 
 
