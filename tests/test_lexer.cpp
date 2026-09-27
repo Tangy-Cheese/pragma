@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <algorithm>
 #include <vector>
 #include "../src/lexer.hpp"
 
@@ -90,4 +91,27 @@ TEST_CASE("Test float literal lexing and range disambiguation"){
     };
 
     REQUIRE(tokens == expected);
+}
+
+TEST_CASE("Test parallel loop tokens"){
+
+    Lexer l("tests/lex_files/test_parallel.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    auto it = std::find_if(tokens.begin(), tokens.end(), [](const Token& t){
+        return t.token_type == TokenType::PARALLEL;
+    });
+
+    REQUIRE(it != tokens.end());
+    REQUIRE(it->literal == "parallel");
+
+    // parallel i in 0..n {
+    Token loop_var = *(it + 1);
+    Token in_tok = *(it + 2);
+
+    REQUIRE(loop_var.token_type == TokenType::IDENTIFIER);
+    REQUIRE(loop_var.literal == "i");
+    REQUIRE(in_tok.token_type == TokenType::IN);
 }

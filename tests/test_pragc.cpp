@@ -64,6 +64,28 @@ TEST_CASE("pragc compiles arrays end to end, including gcc"){
 }
 
 
+TEST_CASE("pragc compiles a parallel loop end to end, including gcc"){
+
+    std::remove("output.c");
+    std::remove("output.o");
+
+    std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/parallel.pragma --compile";
+    int result = std::system(cmd.c_str());
+
+    REQUIRE(result == 0);
+
+    std::ifstream output_file("output.c");
+    std::stringstream buffer;
+    buffer << output_file.rdbuf();
+    std::string output = buffer.str();
+
+    CHECK(output.find("#pragma omp parallel for reduction(+:sum)") != std::string::npos);
+
+    std::ifstream object_file("output.o");
+    CHECK(object_file.good());
+}
+
+
 TEST_CASE("pragc with no --compile does not build output.o"){
 
     std::remove("output.c");

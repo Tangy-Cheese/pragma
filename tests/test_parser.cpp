@@ -79,3 +79,34 @@ TEST_CASE("test array alloc and index parsing"){
     REQUIRE(ret_index != nullptr);
     REQUIRE(ret_index->token.literal == "a");
 }
+
+TEST_CASE("test parallel loop parsing"){
+
+    Lexer l("tests/lex_files/test_parallel.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> temp = std::move(p.funcparse());
+
+    auto& body = temp->block_ptr->body_ptrs;
+    REQUIRE(body.size() == 3); // a = alloc(...), sum = 0, parallel {...}
+
+    auto* parallel = dynamic_cast<parallel_node*>(body[2].get());
+    REQUIRE(parallel != nullptr);
+    REQUIRE(parallel->token.literal == "i");
+    REQUIRE(parallel->body_ptrs.size() == 1);
+
+    // sum += a[i]
+    auto* inner_assign = dynamic_cast<assign_node*>(parallel->body_ptrs[0].get());
+    REQUIRE(inner_assign != nullptr);
+    REQUIRE(inner_assign->token.literal == "sum");
+    REQUIRE(inner_assign->index_ptr == nullptr);
+    REQUIRE(inner_assign->op == TokenType::PLUSEQ);
+
+    auto* idx = dynamic_cast<index_node*>(inner_assign->expr_ptr.get());
+    REQUIRE(idx != nullptr);
+    REQUIRE(idx->token.literal == "a");
+}

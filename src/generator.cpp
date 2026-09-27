@@ -90,6 +90,10 @@ void CodeGenerator::generate_stmts(std::vector<std::unique_ptr<AST_node>>& stmts
         else if (auto* for_stmt = dynamic_cast<for_node*>(stmt.get())){
             generate_for(for_stmt);
         }
+
+        else if (auto* parallel_stmt = dynamic_cast<parallel_node*>(stmt.get())){
+            generate_parallel(parallel_stmt);
+        }
     }
 }
 
@@ -127,6 +131,31 @@ void CodeGenerator::generate_for(for_node* ptr){
 
     std::string var = ptr->token.literal;
 
+    out_stream << "    for (int " << var << " = " << gen_expr(ptr->range_start_ptr.get())
+               << "; " << var << " < " << gen_expr(ptr->range_end_ptr.get())
+               << "; " << var << "++){\n";
+
+    generate_stmts(ptr->body_ptrs);
+
+    out_stream << "    }\n";
+}
+
+
+void CodeGenerator::generate_parallel(parallel_node* ptr){
+
+    std::string var = ptr->token.literal;
+
+    out_stream << "    #pragma omp parallel for";
+
+    auto found = parallel_clauses.find(ptr);
+
+    if (found != parallel_clauses.end()){
+        for (auto& clause: found->second){
+            out_stream << " " << clause;
+        }
+    }
+
+    out_stream << "\n";
     out_stream << "    for (int " << var << " = " << gen_expr(ptr->range_start_ptr.get())
                << "; " << var << " < " << gen_expr(ptr->range_end_ptr.get())
                << "; " << var << "++){\n";

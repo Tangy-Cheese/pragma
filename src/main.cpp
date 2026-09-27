@@ -38,6 +38,7 @@ int main(int argc, char** argv){
         CodeGenerator g;
         g.starting_node = ast.get();
         g.env = t.get_env();
+        g.parallel_clauses = t.get_parallel_clauses();
         g.generate();
     }
 

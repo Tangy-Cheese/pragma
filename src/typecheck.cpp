@@ -48,6 +48,10 @@ const std::unordered_map<std::string, TokenType>& TypeChecker::get_array_env() c
     return array_env;
 }
 
+const std::unordered_map<parallel_node*, std::vector<std::string>>& TypeChecker::get_parallel_clauses() const{
+    return parallel_clauses;
+}
+
 void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
 
     for (auto& stmt: stmts){
@@ -158,6 +162,53 @@ void TypeChecker::check_parallel(parallel_node* ptr){
     }
 
     env[ptr->token.literal] = TokenType::INT_TYPE;
+
+    // OMP safety analysis: classify each top-level write in the body before
+    // check_stmts mutates env below, since "already in env" is exactly how we
+    // tell a shared outer variable from a fresh per-iteration local.
+    std::vector<std::string> clauses;
+
+    for (auto& stmt: ptr->body_ptrs){
+
+        auto* assign = dynamic_cast<assign_node*>(stmt.get());
+        if (!assign) continue;
+
+        if (assign->index_ptr){
+            // Array write: only a bare loop-variable index is provably a
+            // unique write per iteration. Anything else can't be proven safe
+            // yet (affine/nested-loop indices are a later pass).
+            auto* idx_var = dynamic_cast<var_node*>(assign->index_ptr.get());
+            bool unique_index = idx_var && idx_var->token.literal == ptr->token.literal;
+
+            if (!unique_index){
+                std::cerr << "Array write index must be the loop variable for a provably safe "
+                             "parallel for: row " << assign->token.row_idx << std::endl;
+                exit(1);
+            }
+        }
+        else{
+            bool pre_existing = env.find(assign->token.literal) != env.end();
+
+            if (pre_existing){
+                if (assign->op == TokenType::PLUSEQ){
+                    clauses.push_back("reduction(+:" + assign->token.literal + ")");
+                }
+                else if (assign->op == TokenType::ASTERISKEQ){
+                    clauses.push_back("reduction(*:" + assign->token.literal + ")");
+                }
+                else{
+                    std::cerr << "Scalar write with no reduction pattern inside parallel loop: row "
+                              << assign->token.row_idx << ". Use += or *= to combine into '"
+                              << assign->token.literal << "'." << std::endl;
+                    exit(1);
+                }
+            }
+            // else: name is new here, becomes a loop-body-local declaration in
+            // codegen, so each iteration gets its own storage - no clause needed.
+        }
+    }
+
+    parallel_clauses[ptr] = clauses;
 
     check_stmts(ptr->body_ptrs);
 }

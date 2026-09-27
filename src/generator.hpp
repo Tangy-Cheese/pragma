@@ -25,6 +25,9 @@ public:
     // Type environment from TypeChecker::get_env(), keyed by variable name
     std::unordered_map<std::string, TokenType> env;
 
+    // OpenMP clauses from TypeChecker::get_parallel_clauses(), keyed by node pointer
+    std::unordered_map<parallel_node*, std::vector<std::string>> parallel_clauses;
+
     // Mappings
     std::map<TokenType, std::string> type_string;
     std::map<TokenType, std::string> operator_string;
@@ -62,6 +65,13 @@ private:
      * @brief Generates a C for loop from a for_node.
      */
     void generate_for(for_node*);
+
+    /**
+     * @brief Generates a C for loop annotated with a bare `#pragma omp
+     *  parallel for` from a parallel_node. Clause selection (reduction,
+     *  collapse, etc.) is a separate later pass, not part of codegen yet.
+     */
+    void generate_parallel(parallel_node*);
 
     /**
      * @brief Generates a C return statement from a return_node.

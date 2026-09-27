@@ -33,10 +33,20 @@ public:
      */
     const std::unordered_map<std::string, TokenType>& get_array_env() const;
 
+    /**
+     * @brief OpenMP clauses inferred for each parallel_node during type
+     *  checking (e.g. "reduction(+:sum)"), keyed by node pointer. Populated
+     *  by check_parallel.
+     *
+     * @return Map from parallel_node pointer to its inferred clause strings.
+     */
+    const std::unordered_map<parallel_node*, std::vector<std::string>>& get_parallel_clauses() const;
+
 private:
     func_node* root;
     std::unordered_map<std::string, TokenType> env;
     std::unordered_map<std::string, TokenType> array_env;
+    std::unordered_map<parallel_node*, std::vector<std::string>> parallel_clauses;
 
     /**
      * @brief Type checks a function: binds param types into env, then checks

@@ -1,0 +1,8 @@
+fn parsum:int (n:int){
+    a = alloc(int, n)
+    sum = 0
+    parallel i in 0..n {
+        sum += a[i]
+    }
+    return sum
+}

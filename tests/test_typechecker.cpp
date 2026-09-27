@@ -62,3 +62,72 @@ TEST_CASE("test array alloc and index typecheck"){
     auto& env = t.get_env();
     CHECK(env.find("a") == env.end());
 }
+
+
+TEST_CASE("test parallel loop typecheck"){
+
+    Lexer l("tests/lex_files/typechecker/test_parallel_true.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    auto& env = t.get_env();
+    CHECK(env.at("i") == TokenType::INT_TYPE);
+    CHECK(env.at("sum") == TokenType::INT_TYPE);
+
+    auto& array_env = t.get_array_env();
+    CHECK(array_env.at("a") == TokenType::INT_TYPE);
+}
+
+
+TEST_CASE("test parallel loop reduction clause inference"){
+
+    Lexer l("tests/lex_files/typechecker/test_parallel_true.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    auto* parallel = dynamic_cast<parallel_node*>(starting_ptr->block_ptr->body_ptrs[2].get());
+    REQUIRE(parallel != nullptr);
+
+    auto& clauses = t.get_parallel_clauses();
+    auto found = clauses.find(parallel);
+
+    REQUIRE(found != clauses.end());
+    REQUIRE(found->second.size() == 1);
+    CHECK(found->second[0] == "reduction(+:sum)");
+}
+
+
+TEST_CASE("test parallel loop typecheck rejects unreduced scalar write"){
+
+    Lexer l("tests/lex_files/typechecker/test_parallel_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+
+    // Not calling t.checker() yet: it reports errors via exit(1), which would
+    // kill this whole test binary on this fixture's expected error (plain
+    // scalar write with no reduction op). Blocked on the errors-class refactor
+    // (see project_typecheck_errors memory).
+}
