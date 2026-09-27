@@ -1,5 +1,7 @@
 # pragma
 
+[![CI](https://github.com/Tangy-Cheese/pragma/actions/workflows/ci.yml/badge.svg)](https://github.com/Tangy-Cheese/pragma/actions/workflows/ci.yml)
+
 Pragma is a DSL for heavy numerical/HPC code that compiles to parallelised
 OpenMP C. "C without pointers, with automatic parallelism" — you write
 readable numerical functions, `pragc` handles memory and OpenMP pragma
@@ -13,9 +15,13 @@ Source files use the `.pragma` extension. Full language spec: [spec.md](spec.md)
 source.pragma → Lexer → Tokens → Parser → AST → TypeChecker → CodeGenerator → output.c
 ```
 
-## Building
+## Requirements
 
-Requires CMake 3.20+, an OpenMP-capable compiler, and Catch2 3.
+- CMake 3.20 or newer
+- gcc with OpenMP support
+- Catch2 v3, installed system-wide (v2 will not work)
+
+## Building
 
 ```bash
 cmake -B build
