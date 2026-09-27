@@ -1,0 +1,5 @@
+fn badidx:int (n:int){
+    a = alloc(int, n)
+    a[1.5] = n
+    return n
+}

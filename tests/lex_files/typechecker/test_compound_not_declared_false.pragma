@@ -1,0 +1,4 @@
+fn badcompound:int (n:int){
+    x += n
+    return n
+}

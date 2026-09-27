@@ -1,0 +1,5 @@
+fn badmulti:int (n:int){
+    x = y
+    z += n
+    return n
+}

@@ -1,0 +1,5 @@
+fn badcompoundtype:float (n:int){
+    x = 1.5
+    x += n
+    return x
+}

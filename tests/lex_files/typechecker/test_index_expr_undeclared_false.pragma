@@ -1,0 +1,3 @@
+fn badidxexpr:int (n:int){
+    return b[0]
+}

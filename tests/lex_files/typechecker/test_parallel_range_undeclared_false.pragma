@@ -1,0 +1,7 @@
+fn badparallel:int (n:int){
+    sum = 0
+    parallel i in start..n {
+        sum += i
+    }
+    return sum
+}

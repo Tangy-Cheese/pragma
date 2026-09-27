@@ -1,0 +1,7 @@
+fn badfor:int (n:int){
+    sum = 0
+    for i in start..n {
+        sum = sum+i
+    }
+    return sum
+}

@@ -4,7 +4,7 @@
 
 
 TEST_CASE("test function parser"){
-    
+
     Lexer l("tests/lex_files/typechecker/test_type_checker_false.pragma");
 
     l.scan();
@@ -15,10 +15,15 @@ TEST_CASE("test function parser"){
     std::unique_ptr<func_node> starting_ptr = p.funcparse();
 
     TypeChecker t(starting_ptr.get());
+    t.checker();
 
-    // Not calling t.checker() yet: it reports errors via exit(1), which would
-    // kill this whole test binary on this fixture's expected type mismatch.
-    // Blocked on the errors-class refactor (see project_typecheck_errors memory).
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "function 'add' returns a value of the wrong type");
+    CHECK(diags[0].row_idx == 1);
+    CHECK(diags[0].severity == Severity::ERROR);
 }
 
 
@@ -125,9 +130,366 @@ TEST_CASE("test parallel loop typecheck rejects unreduced scalar write"){
     std::unique_ptr<func_node> starting_ptr = p.funcparse();
 
     TypeChecker t(starting_ptr.get());
+    t.checker();
 
-    // Not calling t.checker() yet: it reports errors via exit(1), which would
-    // kill this whole test binary on this fixture's expected error (plain
-    // scalar write with no reduction op). Blocked on the errors-class refactor
-    // (see project_typecheck_errors memory).
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "'sum' is written without a reduction operator inside a parallel loop. "
+                               "Use += or *= to combine into it safely");
+    CHECK(diags[0].row_idx == 5);
+}
+
+
+TEST_CASE("test return expression with undeclared identifier"){
+
+    Lexer l("tests/lex_files/typechecker/test_return_undeclared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "'x' is not declared");
+    CHECK(diags[0].row_idx == 2);
+    CHECK(diags[1].message == "could not determine the type of the return expression in function 'badreturn'");
+    CHECK(diags[1].row_idx == 1);
+}
+
+
+TEST_CASE("test array write to undeclared array"){
+
+    Lexer l("tests/lex_files/typechecker/test_array_not_declared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "'a' is not a declared array");
+    CHECK(diags[0].row_idx == 2);
+}
+
+
+TEST_CASE("test array write with non-int index"){
+
+    Lexer l("tests/lex_files/typechecker/test_array_index_not_int_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "array index for 'a' must be of type int");
+    CHECK(diags[0].row_idx == 3);
+}
+
+
+TEST_CASE("test array element type mismatch on write"){
+
+    Lexer l("tests/lex_files/typechecker/test_array_elem_mismatch_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "value assigned to 'a[...]' does not match its element type");
+    CHECK(diags[0].row_idx == 3);
+}
+
+
+TEST_CASE("test array alloc with non-int size"){
+
+    Lexer l("tests/lex_files/typechecker/test_array_size_not_int_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "array size for 'a' must be of type int");
+    CHECK(diags[0].row_idx == 2);
+}
+
+
+TEST_CASE("test assignment from undeclared identifier"){
+
+    Lexer l("tests/lex_files/typechecker/test_assign_undeclared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "'y' is not declared");
+    CHECK(diags[1].message == "could not determine the type of the expression assigned to 'x'");
+}
+
+
+TEST_CASE("test compound assignment to undeclared identifier"){
+
+    Lexer l("tests/lex_files/typechecker/test_compound_not_declared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "'x' must be declared before it can be used with a compound assignment");
+    CHECK(diags[0].row_idx == 2);
+}
+
+
+TEST_CASE("test compound assignment type mismatch"){
+
+    Lexer l("tests/lex_files/typechecker/test_compound_mismatch_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "value assigned to 'x' does not match its declared type");
+    CHECK(diags[0].row_idx == 3);
+}
+
+
+TEST_CASE("test for loop with undeclared range bound recovers and keeps checking"){
+
+    Lexer l("tests/lex_files/typechecker/test_for_range_undeclared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "'start' is not declared");
+    CHECK(diags[1].message == "could not determine the type of the loop range for 'i'");
+
+    // Checker still assumes i:int and finishes checking the body instead of
+    // aborting - the loop variable ends up bound despite the earlier error.
+    auto& env = t.get_env();
+    CHECK(env.at("i") == TokenType::INT_TYPE);
+}
+
+
+TEST_CASE("test parallel loop with undeclared range bound recovers and keeps checking"){
+
+    Lexer l("tests/lex_files/typechecker/test_parallel_range_undeclared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "'start' is not declared");
+    CHECK(diags[1].message == "could not determine the type of the parallel loop range for 'i'");
+
+    auto& env = t.get_env();
+    CHECK(env.at("i") == TokenType::INT_TYPE);
+}
+
+
+TEST_CASE("test parallel loop array write with non-loop-variable index"){
+
+    Lexer l("tests/lex_files/typechecker/test_parallel_nonunique_index_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 1);
+    CHECK(diags[0].message == "array write index must be exactly the loop variable 'i' for this parallel loop "
+                               "to be provably safe");
+    CHECK(diags[0].row_idx == 4);
+}
+
+
+TEST_CASE("test mismatched operand types in return expression"){
+
+    Lexer l("tests/lex_files/typechecker/test_operand_mismatch_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "mismatched operand types around '+'");
+    CHECK(diags[1].message == "could not determine the type of the return expression in function 'badoperand'");
+}
+
+
+TEST_CASE("test return of undeclared array element"){
+
+    Lexer l("tests/lex_files/typechecker/test_index_expr_undeclared_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 2);
+    CHECK(diags[0].message == "'b' is not a declared array");
+    CHECK(diags[1].message == "could not determine the type of the return expression in function 'badidxexpr'");
+}
+
+
+TEST_CASE("test checker collects every error instead of stopping at the first"){
+
+    Lexer l("tests/lex_files/typechecker/test_multi_errors_false.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    REQUIRE(t.get_diagnostics().has_errors());
+
+    auto& diags = t.get_diagnostics().get_diagnostics();
+    REQUIRE(diags.size() == 3);
+    CHECK(diags[0].message == "'y' is not declared");
+    CHECK(diags[1].message == "could not determine the type of the expression assigned to 'x'");
+    CHECK(diags[2].message == "'z' must be declared before it can be used with a compound assignment");
+}
+
+
+TEST_CASE("test valid program produces no diagnostics"){
+
+    Lexer l("tests/lex_files/typechecker/test_type_checker_true.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    CHECK_FALSE(t.get_diagnostics().has_errors());
+    CHECK(t.get_diagnostics().get_diagnostics().empty());
 }

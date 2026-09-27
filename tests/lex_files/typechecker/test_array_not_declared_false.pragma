@@ -1,0 +1,4 @@
+fn badarr:int (n:int){
+    a[0] = n
+    return n
+}

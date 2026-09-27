@@ -1,0 +1,7 @@
+fn badparidx:int (n:int){
+    a = alloc(int, n)
+    parallel i in 0..n {
+        a[0] = i
+    }
+    return n
+}
