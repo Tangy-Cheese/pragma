@@ -56,7 +56,7 @@ void Lexer::push_token(TokenType type, std::string lit, size_t row){
 
 void Lexer::scan(){
     
-    for (int row=0; row<Lexer::file_strings.size(); row++) {
+    for (size_t row=0; row<Lexer::file_strings.size(); row++) {
            
         // Number of chars in each line
         size_t N = Lexer::file_strings[row].length(); 
@@ -64,7 +64,7 @@ void Lexer::scan(){
         std::string row_str = Lexer::file_strings[row];
         std::string buffer;
 
-        int i = 0;
+        size_t i = 0;
         while (i<N){
             
             char _char = row_str[i];
