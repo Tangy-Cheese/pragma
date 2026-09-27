@@ -21,6 +21,7 @@ Lexer::Lexer(std::string file_name){
     keyword_map.insert({"out",TokenType::PRINT});
     keyword_map.insert({"for",TokenType::FOR});
     keyword_map.insert({"in",TokenType::IN});
+    keyword_map.insert({"alloc",TokenType::ALLOC});
 
     //Types
     keyword_map.insert({"int",TokenType::INT_TYPE});
@@ -125,6 +126,12 @@ void Lexer::scan(){
                         break;
                     case '}':
                         push_token(TokenType::R_CURLY, "}", row+1);
+                        break;
+                    case '[':
+                        push_token(TokenType::L_BRACKET, "[", row+1);
+                        break;
+                    case ']':
+                        push_token(TokenType::R_BRACKET, "]", row+1);
                         break;
                     case '+':
                         if (i+1<N && row_str[i+1]=='='){

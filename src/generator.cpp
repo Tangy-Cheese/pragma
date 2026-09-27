@@ -38,6 +38,7 @@ CodeGenerator::~CodeGenerator(){}
 
 
 void CodeGenerator::generate(){
+    out_stream << "#include <stdlib.h>\n\n";
     generate_func(starting_node);
 }
 
@@ -97,6 +98,19 @@ void CodeGenerator::generate_assign(assign_node* ptr){
 
     std::string name = ptr->token.literal;
 
+    if (ptr->index_ptr){
+        out_stream << "    " << name << "[" << gen_expr(ptr->index_ptr.get()) << "] "
+                   << operator_string[ptr->op] << " " << gen_expr(ptr->expr_ptr.get()) << ";\n";
+        return;
+    }
+
+    if (auto* alloc = dynamic_cast<alloc_node*>(ptr->expr_ptr.get())){
+        out_stream << "    " << type_string[alloc->elem_type] << "* " << name << " = malloc("
+                   << gen_expr(alloc->size_ptr.get()) << " * sizeof(" << type_string[alloc->elem_type] << "));\n";
+        declared_vars.insert(name);
+        return;
+    }
+
     if (declared_vars.count(name) == 0){
         // ptr->op is always EQUALS on a first declaration; typecheck rejects
         // a compound assignment to an undeclared variable before this runs.
@@ -132,6 +146,10 @@ std::string CodeGenerator::gen_expr(AST_node* node){
 
     if (auto* leaf = dynamic_cast<var_node*>(node)){
         return leaf->token.literal;
+    }
+
+    if (auto* idx = dynamic_cast<index_node*>(node)){
+        return idx->token.literal + "[" + gen_expr(idx->index_ptr.get()) + "]";
     }
 
     if (auto* bin = dynamic_cast<bin_expr_node*>(node)){

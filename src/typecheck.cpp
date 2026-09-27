@@ -44,11 +44,56 @@ const std::unordered_map<std::string, TokenType>& TypeChecker::get_env() const{
     return env;
 }
 
+const std::unordered_map<std::string, TokenType>& TypeChecker::get_array_env() const{
+    return array_env;
+}
+
 void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
 
     for (auto& stmt: stmts){
 
         if (auto* assign = dynamic_cast<assign_node*>(stmt.get())){
+
+            if (assign->index_ptr){
+                // Array element write: a[i] = expr. Doesn't touch env/array_env,
+                // just checks the index and value against the array's element type.
+                auto found = array_env.find(assign->token.literal);
+
+                if (found == array_env.end()){
+                    std::cerr << "Undeclared array: " << assign->token.literal << std::endl;
+                    exit(1);
+                }
+
+                std::optional<TokenType> index_type = check_expr(assign->index_ptr.get());
+
+                if (index_type != TokenType::INT_TYPE){
+                    std::cerr << "Array index must be int" << std::endl;
+                    exit(1);
+                }
+
+                std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
+
+                if (stmt_type != found->second){
+                    std::cerr << "Type mismatch" << std::endl;
+                    exit(1);
+                }
+
+                continue;
+            }
+
+            if (auto* alloc = dynamic_cast<alloc_node*>(assign->expr_ptr.get())){
+                // Array declaration: a = alloc(type, size). Recorded in array_env,
+                // never env, so a[i] and a are tracked as distinct namespaces.
+                std::optional<TokenType> size_type = check_expr(alloc->size_ptr.get());
+
+                if (size_type != TokenType::INT_TYPE){
+                    std::cerr << "Array size must be int" << std::endl;
+                    exit(1);
+                }
+
+                array_env[assign->token.literal] = alloc->elem_type;
+                continue;
+            }
 
             std::optional<TokenType> stmt_type = check_expr(assign->expr_ptr.get());
 
@@ -127,6 +172,25 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
                     std::cerr << "Bad return type" << std::endl;
             }
         }
+    }
+
+    if (auto* idx = dynamic_cast<index_node*>(node)){
+
+        auto found = array_env.find(idx->token.literal);
+
+        if (found == array_env.end()){
+            std::cerr << "Undeclared array: " << idx->token.literal << std::endl;
+            return std::nullopt;
+        }
+
+        std::optional<TokenType> index_type = check_expr(idx->index_ptr.get());
+
+        if (index_type != TokenType::INT_TYPE){
+            std::cerr << "Array index must be int" << std::endl;
+            return std::nullopt;
+        }
+
+        return found->second;
     }
 
     if (auto* bin = dynamic_cast<bin_expr_node*>(node)){

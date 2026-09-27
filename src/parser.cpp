@@ -153,6 +153,12 @@ std::unique_ptr<assign_node> Parser::assignparse(){
     assign_ptr->token = peek();
     advance();
 
+    if (peek().token_type == TokenType::L_BRACKET){
+        advance();
+        assign_ptr->index_ptr = parse_expr(0);
+        expect(TokenType::R_BRACKET);
+    }
+
     Token op_token = peek();
 
     if (op_token.token_type != TokenType::EQUALS && op_token.token_type != TokenType::PLUSEQ &&
@@ -214,16 +220,52 @@ std::unique_ptr<for_node> Parser::forparse(){
 std::unique_ptr<AST_node> Parser::parse_primary(){
     Token t = peek();
 
+    if (t.token_type == TokenType::ALLOC){
+        return allocparse();
+    }
+
     if (t.token_type == TokenType::IDENTIFIER || t.token_type == TokenType::INT_LIT || t.token_type == TokenType::FLOAT_LIT){
+
+        advance();
+
+        if (t.token_type == TokenType::IDENTIFIER && peek().token_type == TokenType::L_BRACKET){
+            advance();
+
+            auto idx_node = std::make_unique<index_node>();
+            idx_node->token = t;
+            idx_node->index_ptr = parse_expr(0);
+
+            expect(TokenType::R_BRACKET);
+
+            return idx_node;
+        }
 
         auto node = std::make_unique<var_node>();
         node->token = t;
-        advance();
         return node;
     }
 
     std::cerr << "Unexpected token in expression: row " << t.row_idx << std::endl;
     return nullptr;
+}
+
+
+std::unique_ptr<AST_node> Parser::allocparse(){
+
+    expect(TokenType::ALLOC);
+    expect(TokenType::L_PAREN);
+
+    auto alloc_ptr = std::make_unique<alloc_node>();
+    alloc_ptr->elem_type = peek().token_type;
+    advance();
+
+    expect(TokenType::COMMA);
+
+    alloc_ptr->size_ptr = parse_expr(0);
+
+    expect(TokenType::R_PAREN);
+
+    return alloc_ptr;
 }
 
 

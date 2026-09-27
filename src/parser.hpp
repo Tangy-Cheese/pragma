@@ -16,6 +16,8 @@ struct bin_expr_node;
 struct var_node;
 struct assign_node;
 struct for_node;
+struct alloc_node;
+struct index_node;
 
 class Parser{
 public:
@@ -74,6 +76,11 @@ public:
      * @brief Parses a for loop into a for_node.
      */
     std::unique_ptr<for_node> forparse();
+
+    /**
+     * @brief Parses an `alloc(type, size)` call into an alloc_node.
+     */
+    std::unique_ptr<AST_node> allocparse();
 
     /**
      * @brief Parses an expression using precedence climbing.
@@ -137,7 +144,18 @@ struct var_node: public AST_node{
 
 struct assign_node: public AST_node{
     std::unique_ptr<AST_node> expr_ptr;
+    std::unique_ptr<AST_node> index_ptr; // non-null for array element writes: a[i] = ...
     TokenType op; // EQUALS, PLUSEQ, MINUSEQ, ASTERISKEQ or SLASHEQ
+};
+
+struct alloc_node: public AST_node{
+    TokenType elem_type;
+    std::unique_ptr<AST_node> size_ptr;
+};
+
+struct index_node: public AST_node{
+    // token holds the base array identifier
+    std::unique_ptr<AST_node> index_ptr;
 };
 
 struct for_node: public AST_node{

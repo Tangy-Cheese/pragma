@@ -25,9 +25,18 @@ public:
      */
     const std::unordered_map<std::string, TokenType>& get_env() const;
 
+    /**
+     * @brief Read-only access to the array element types built up during
+     *  checking, keyed by array variable name.
+     *
+     * @return Map from array variable name to element type.
+     */
+    const std::unordered_map<std::string, TokenType>& get_array_env() const;
+
 private:
     func_node* root;
     std::unordered_map<std::string, TokenType> env;
+    std::unordered_map<std::string, TokenType> array_env;
 
     /**
      * @brief Type checks a function: binds param types into env, then checks
