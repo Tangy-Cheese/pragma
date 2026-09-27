@@ -40,3 +40,25 @@ TEST_CASE("test function typecheck true"){
     CHECK(env.at("a") == TokenType::FLOAT_TYPE);
     CHECK(env.at("b") == TokenType::FLOAT_TYPE);
 }
+
+
+TEST_CASE("test array alloc and index typecheck"){
+
+    Lexer l("tests/lex_files/typechecker/test_array_true.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> starting_ptr = p.funcparse();
+
+    TypeChecker t(starting_ptr.get());
+    t.checker();
+
+    auto& array_env = t.get_array_env();
+    CHECK(array_env.at("a") == TokenType::INT_TYPE);
+
+    auto& env = t.get_env();
+    CHECK(env.find("a") == env.end());
+}

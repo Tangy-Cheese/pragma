@@ -1,0 +1,11 @@
+fn arrsum:int (n:int){
+    a = alloc(int, n)
+    for i in 0..n {
+        a[i] = i
+    }
+    sum = 0
+    for i in 0..n {
+        sum = sum + a[i]
+    }
+    return sum
+}

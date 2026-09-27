@@ -100,7 +100,7 @@ void Lexer::scan(){
             }
 
             else if (std::isdigit(_char)){
-             
+
                 while (isdigit(_char) && i<=N){
                     buffer.push_back(_char);
 
@@ -108,7 +108,25 @@ void Lexer::scan(){
                     _char = row_str[i];
                 }
 
-                push_token(TokenType::INT_LIT, buffer, row+1);
+                bool is_float = false;
+
+                // Only consume the '.' as a decimal point if a digit follows it;
+                // otherwise it's the start of a range's '..' (e.g. 0..n).
+                if (_char == '.' && i+1<N && isdigit(row_str[i+1])){
+                    is_float = true;
+                    buffer.push_back(_char);
+                    i++;
+                    _char = row_str[i];
+
+                    while (isdigit(_char) && i<=N){
+                        buffer.push_back(_char);
+
+                        i++;
+                        _char = row_str[i];
+                    }
+                }
+
+                push_token(is_float ? TokenType::FLOAT_LIT : TokenType::INT_LIT, buffer, row+1);
                 buffer.clear();
             }
                 

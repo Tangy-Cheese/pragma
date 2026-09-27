@@ -41,6 +41,29 @@ TEST_CASE("pragc --compile also builds output.o"){
 }
 
 
+TEST_CASE("pragc compiles arrays end to end, including gcc"){
+
+    std::remove("output.c");
+    std::remove("output.o");
+
+    std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/array.pragma --compile";
+    int result = std::system(cmd.c_str());
+
+    REQUIRE(result == 0);
+
+    std::ifstream output_file("output.c");
+    std::stringstream buffer;
+    buffer << output_file.rdbuf();
+    std::string output = buffer.str();
+
+    CHECK(output.find("int* a = malloc(n * sizeof(int));") != std::string::npos);
+    CHECK(output.find("a[i] = i;") != std::string::npos);
+
+    std::ifstream object_file("output.o");
+    CHECK(object_file.good());
+}
+
+
 TEST_CASE("pragc with no --compile does not build output.o"){
 
     std::remove("output.c");

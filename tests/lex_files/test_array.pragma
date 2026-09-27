@@ -1,0 +1,5 @@
+fn arrfn:int (n:int){
+    a = alloc(int, n)
+    a[0] = n
+    return a[0]
+}

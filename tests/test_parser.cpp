@@ -44,3 +44,38 @@ TEST_CASE("test function parser"){
     REQUIRE(bin->var1_ptr->token == var_a);
     REQUIRE(bin->var2_ptr->token == var_b);
 }
+
+TEST_CASE("test array alloc and index parsing"){
+
+    Lexer l("tests/lex_files/test_array.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::unique_ptr<func_node> temp = std::move(p.funcparse());
+
+    auto& body = temp->block_ptr->body_ptrs;
+    REQUIRE(body.size() == 2);
+
+    // a = alloc(int, n)
+    auto* alloc_assign = dynamic_cast<assign_node*>(body[0].get());
+    REQUIRE(alloc_assign != nullptr);
+    REQUIRE(alloc_assign->index_ptr == nullptr);
+
+    auto* alloc = dynamic_cast<alloc_node*>(alloc_assign->expr_ptr.get());
+    REQUIRE(alloc != nullptr);
+    REQUIRE(alloc->elem_type == TokenType::INT_TYPE);
+
+    // a[0] = n
+    auto* index_assign = dynamic_cast<assign_node*>(body[1].get());
+    REQUIRE(index_assign != nullptr);
+    REQUIRE(index_assign->token.literal == "a");
+    REQUIRE(index_assign->index_ptr != nullptr);
+
+    // return a[0]
+    auto* ret_index = dynamic_cast<index_node*>(temp->block_ptr->return_ptr->expr_ptr.get());
+    REQUIRE(ret_index != nullptr);
+    REQUIRE(ret_index->token.literal == "a");
+}

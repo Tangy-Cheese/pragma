@@ -49,5 +49,45 @@ TEST_CASE("Matching token vectors"){
     {TokenType::INT_LIT, "2", 5},
     };
 
-    REQUIRE(tokens == expected); 
+    REQUIRE(tokens == expected);
+}
+
+TEST_CASE("Test array tokens"){
+
+    Lexer l("tests/lex_files/test_array.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    REQUIRE(tokens.size() == 30);
+
+    Token alloc_tok = {TokenType::ALLOC, "alloc", 2};
+    Token l_bracket = {TokenType::L_BRACKET, "[", 3};
+    Token r_bracket = {TokenType::R_BRACKET, "]", 3};
+
+    REQUIRE(tokens[12] == alloc_tok);
+    REQUIRE(tokens[19] == l_bracket);
+    REQUIRE(tokens[21] == r_bracket);
+}
+
+TEST_CASE("Test float literal lexing and range disambiguation"){
+
+    Lexer l("tests/lex_files/test_float.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    std::vector<Token> expected{
+
+    {TokenType::IDENTIFIER, "x", 1},
+    {TokenType::EQUALS, "=", 1},
+    {TokenType::FLOAT_LIT, "3.14", 1},
+    {TokenType::IDENTIFIER, "y", 2},
+    {TokenType::EQUALS, "=", 2},
+    {TokenType::INT_LIT, "0", 2},
+    {TokenType::RANGE, "..", 2},
+    {TokenType::INT_LIT, "5", 2},
+    };
+
+    REQUIRE(tokens == expected);
 }
