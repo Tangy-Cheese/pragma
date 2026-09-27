@@ -47,7 +47,7 @@ int main(int argc, char** argv){
     if (compile_c){
         // -c only: the parser produces one function per file, not a full
         // program with main(), so there's nothing to link into an executable yet.
-        int result = std::system("gcc -std=c99 -c -o output.o output.c");
+        int result = std::system("gcc -std=c99 -fopenmp -c -o output.o output.c");
 
         if (result != 0){
             std::cerr << "C compilation failed" << std::endl;
