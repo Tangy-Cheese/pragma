@@ -11,7 +11,7 @@ Lexer::Lexer(std::string file_name){
     std::ifstream input_stream(file_name);
 
     // check stream status
-    if (!input_stream) std::cerr << "Can't open input file!";
+    if (!input_stream) std::cerr << "Error: could not open input file '" << file_name << "'." << std::endl;
 
     conv_string(input_stream);
 
@@ -206,7 +206,7 @@ void Lexer::scan(){
                             i++;
                         }
                         else{
-                            std::cerr << "Unexpected character '.': row " << row+1 << std::endl;
+                            std::cerr << "Error: unexpected character '.' (row " << row+1 << ")." << std::endl;
                         }
                         break;
                 }

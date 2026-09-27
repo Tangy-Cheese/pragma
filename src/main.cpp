@@ -56,7 +56,7 @@ int main(int argc, char** argv){
         int result = std::system("gcc -std=c99 -fopenmp -c -o output.o output.c");
 
         if (result != 0){
-            std::cerr << "C compilation failed" << std::endl;
+            std::cerr << "Error: gcc failed to compile output.c." << std::endl;
             return 1;
         }
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv){
         };
 
         if (type_string.find(ast->return_type) == type_string.end()){
-            std::cerr << "--run only supports int/float/double return types" << std::endl;
+            std::cerr << "Error: --run only supports int/float/double return types." << std::endl;
             return 1;
         }
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv){
             auto& param = ast->param_ptrs[i];
 
             if (type_string.find(param->param_type) == type_string.end()){
-                std::cerr << "--run only supports int/float/double parameter types" << std::endl;
+                std::cerr << "Error: --run only supports int/float/double parameter types." << std::endl;
                 return 1;
             }
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv){
         int link_result = std::system("gcc -std=c99 -fopenmp output.c driver.c -o output_bin");
 
         if (link_result != 0){
-            std::cerr << "Link failed" << std::endl;
+            std::cerr << "Error: gcc failed to link output_bin." << std::endl;
             return 1;
         }
 
@@ -138,7 +138,7 @@ int main(int argc, char** argv){
         int run_result = std::system("./output_bin");
 
         if (run_result != 0){
-            std::cerr << "output_bin exited with a nonzero status" << std::endl;
+            std::cerr << "Error: output_bin exited with a nonzero status." << std::endl;
             return 1;
         }
     }

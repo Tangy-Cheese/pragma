@@ -33,7 +33,8 @@ void Parser::expect(TokenType expected){
         curr_element++;
     }
     else{
-        std::cerr << "Wrong syntax: row" + std::to_string(tokens[curr_element].row_idx) << std::endl;
+        std::cerr << "Error: syntax error, unexpected token (row "
+                  << tokens[curr_element].row_idx << ")." << std::endl;
     }
 }
 
@@ -69,7 +70,7 @@ std::unique_ptr<func_node> Parser::funcparse(){
     }
 
     else{
-        std::cerr << "Missing function name: row" + std::to_string(identifier.row_idx) << std::endl;
+        std::cerr << "Error: missing function name (row " << identifier.row_idx << ")." << std::endl;
     }
 
     return starting_node;
@@ -127,7 +128,7 @@ std::unique_ptr<block_node> Parser::blockparse(){
             body_nodes.push_back(parallelparse());
         }
         else{
-            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
             advance();
         }
     }
@@ -167,7 +168,8 @@ std::unique_ptr<assign_node> Parser::assignparse(){
     if (op_token.token_type != TokenType::EQUALS && op_token.token_type != TokenType::PLUSEQ &&
         op_token.token_type != TokenType::MINUSEQ && op_token.token_type != TokenType::ASTERISKEQ &&
         op_token.token_type != TokenType::SLASHEQ){
-        std::cerr << "Expected assignment operator: row " + std::to_string(op_token.row_idx) << std::endl;
+        std::cerr << "Error: expected an assignment operator (=, +=, -=, *=, or /=) (row "
+                  << op_token.row_idx << ")." << std::endl;
     }
 
     assign_ptr->op = op_token.token_type;
@@ -210,7 +212,7 @@ std::unique_ptr<for_node> Parser::forparse(){
             body_nodes.push_back(parallelparse());
         }
         else{
-            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
             advance();
         }
     }
@@ -254,7 +256,7 @@ std::unique_ptr<parallel_node> Parser::parallelparse(){
             body_nodes.push_back(parallelparse());
         }
         else{
-            std::cerr << "Unsupported statement: row " + std::to_string(peek().row_idx) << std::endl;
+            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
             advance();
         }
     }
@@ -295,7 +297,7 @@ std::unique_ptr<AST_node> Parser::parse_primary(){
         return node;
     }
 
-    std::cerr << "Unexpected token in expression: row " << t.row_idx << std::endl;
+    std::cerr << "Error: unexpected token in expression (row " << t.row_idx << ")." << std::endl;
     return nullptr;
 }
 

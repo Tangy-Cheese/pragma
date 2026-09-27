@@ -185,6 +185,6 @@ std::string CodeGenerator::gen_expr(AST_node* node){
         return "(" + gen_expr(bin->var1_ptr.get()) + " " + operator_string[bin->operand] + " " + gen_expr(bin->var2_ptr.get()) + ")";
     }
 
-    std::cerr << "Unknown expression node" << std::endl;
+    std::cerr << "Error: unrecognized expression node (row " << node->token.row_idx << ")." << std::endl;
     return "";
 }
