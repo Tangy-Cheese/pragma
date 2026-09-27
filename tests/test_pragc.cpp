@@ -5,11 +5,25 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
+
+
+// Deletes the given repo-root files when the test case scope exits, whether
+// it passes, fails, or a REQUIRE throws partway through - stack unwinding
+// still runs local destructors, so cleanup happens either way.
+struct FileCleanup{
+    std::vector<std::string> paths;
+
+    ~FileCleanup(){
+        for (auto& path: paths) std::remove(path.c_str());
+    }
+};
 
 
 TEST_CASE("pragc compiles a .pragma file to output.c"){
 
     std::remove("output.c");
+    FileCleanup cleanup{{"output.c"}};
 
     std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/sumto.pragma";
     int result = std::system(cmd.c_str());
@@ -31,6 +45,7 @@ TEST_CASE("pragc --compile also builds output.o"){
 
     std::remove("output.c");
     std::remove("output.o");
+    FileCleanup cleanup{{"output.c", "output.o"}};
 
     std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/sumto.pragma --compile";
     int result = std::system(cmd.c_str());
@@ -46,6 +61,7 @@ TEST_CASE("pragc compiles arrays end to end, including gcc"){
 
     std::remove("output.c");
     std::remove("output.o");
+    FileCleanup cleanup{{"output.c", "output.o"}};
 
     std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/array.pragma --compile";
     int result = std::system(cmd.c_str());
@@ -69,6 +85,7 @@ TEST_CASE("pragc compiles a parallel loop end to end, including gcc"){
 
     std::remove("output.c");
     std::remove("output.o");
+    FileCleanup cleanup{{"output.c", "output.o"}};
 
     std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/parallel.pragma --compile";
     int result = std::system(cmd.c_str());
@@ -103,6 +120,7 @@ TEST_CASE("benchmark: sequential vs parallel reduction on a large sum"){
     std::remove("bench_driver.c");
     std::remove("bench_bin");
     std::remove("bench_out.txt");
+    FileCleanup cleanup{{"output.c", "output_seq.c", "output_par.c", "bench_driver.c", "bench_bin", "bench_out.txt"}};
 
     std::string seq_cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/seq_bench.pragma";
     REQUIRE(std::system(seq_cmd.c_str()) == 0);
@@ -166,6 +184,7 @@ TEST_CASE("pragc with no --compile does not build output.o"){
 
     std::remove("output.c");
     std::remove("output.o");
+    FileCleanup cleanup{{"output.c", "output.o"}};
 
     std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/sumto.pragma";
     int result = std::system(cmd.c_str());
