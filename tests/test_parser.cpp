@@ -12,7 +12,7 @@ TEST_CASE("test function parser"){
     
     Parser p(tokens);
 
-    std::unique_ptr<func_node> temp = std::move(p.funcparse());
+    std::unique_ptr<func_node> temp = p.funcparse();
 
     // mock the Tokens at the nodes
     Token func = {TokenType::IDENTIFIER, "add", 1};
@@ -54,7 +54,7 @@ TEST_CASE("test array alloc and index parsing"){
 
     Parser p(tokens);
 
-    std::unique_ptr<func_node> temp = std::move(p.funcparse());
+    std::unique_ptr<func_node> temp = p.funcparse();
 
     auto& body = temp->block_ptr->body_ptrs;
     REQUIRE(body.size() == 2);
@@ -89,7 +89,7 @@ TEST_CASE("test parallel loop parsing"){
 
     Parser p(tokens);
 
-    std::unique_ptr<func_node> temp = std::move(p.funcparse());
+    std::unique_ptr<func_node> temp = p.funcparse();
 
     auto& body = temp->block_ptr->body_ptrs;
     REQUIRE(body.size() == 3); // a = alloc(...), sum = 0, parallel {...}
