@@ -1,0 +1,7 @@
+fn f:int (n:int){
+    s = 0
+    parallel i in 0..n {
+        i = 3
+    }
+    return s
+}

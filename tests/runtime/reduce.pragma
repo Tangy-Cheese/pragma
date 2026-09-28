@@ -1,0 +1,7 @@
+fn sumall:int (n:int){
+    s = 0
+    parallel i in 0..n {
+        s += i
+    }
+    return s
+}

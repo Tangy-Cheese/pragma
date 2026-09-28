@@ -24,3 +24,9 @@ endforeach()
 # Generator and Pragc both write and read back ./output.c, so running them
 # concurrently under ctest -j would race on that one file.
 set_tests_properties(Generator Pragc PROPERTIES RUN_SERIAL TRUE)
+
+# End-to-end: generated C must give the sequential answer at 1 and 8 threads.
+# Works in a temp directory, so it doesn't share output.c with the tests above.
+add_test(NAME Runtime
+    COMMAND bash tests/runtime/run.sh $<TARGET_FILE:pragc>
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

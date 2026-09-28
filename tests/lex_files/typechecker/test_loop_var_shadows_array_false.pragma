@@ -1,0 +1,6 @@
+fn f:int (n:int){
+    a = alloc(int, n)
+    for a in 0..n {
+    }
+    return n
+}

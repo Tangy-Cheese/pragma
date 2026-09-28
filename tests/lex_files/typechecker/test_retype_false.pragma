@@ -1,0 +1,5 @@
+fn f:float (n:int){
+    x = 0
+    x = 1.5
+    return x
+}

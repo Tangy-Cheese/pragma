@@ -1,0 +1,7 @@
+fn f:float (n:int){
+    s = 0.0
+    parallel i in 0..n {
+        s += 1.5
+    }
+    return s
+}

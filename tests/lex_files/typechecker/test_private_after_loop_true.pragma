@@ -1,0 +1,11 @@
+fn f:int (n:int){
+    a = alloc(int, n)
+    for k in 0..1 {
+        t = 0
+    }
+    parallel i in 0..n {
+        t = i
+        a[i] = t
+    }
+    return a[0]
+}

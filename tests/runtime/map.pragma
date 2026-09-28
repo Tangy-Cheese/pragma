@@ -1,0 +1,11 @@
+fn mapsum:int (n:int){
+    a = alloc(int, n)
+    parallel i in 0..n {
+        a[i] = i*2
+    }
+    s = 0
+    for i in 0..n {
+        s += a[i]
+    }
+    return s
+}

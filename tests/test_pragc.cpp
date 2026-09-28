@@ -20,6 +20,45 @@ struct FileCleanup{
 };
 
 
+/**
+ * @brief Runs pragc on a fixture, requires it to succeed, then compiles the
+ *  generated C with the strict flags the generated code is expected to meet.
+ *  Callers must clean up output.c and output.o.
+ *
+ * @param fixture Path to a .pragma file, relative to the repo root.
+ * @return Contents of the generated output.c.
+ */
+static std::string generate_and_compile_strict(const std::string& fixture){
+
+    std::remove("output.c");
+    std::remove("output.o");
+
+    std::string cmd = std::string(PRAGC_PATH) + " " + fixture;
+    REQUIRE(std::system(cmd.c_str()) == 0);
+
+    REQUIRE(std::system("gcc -std=c99 -fopenmp -Wall -Werror -c output.c -o output.o") == 0);
+
+    std::ifstream output_file("output.c");
+    std::stringstream buffer;
+    buffer << output_file.rdbuf();
+    return buffer.str();
+}
+
+/**
+ * @brief Number of non-overlapping occurrences of needle in text.
+ */
+static int count_occurrences(const std::string& text, const std::string& needle){
+
+    int count = 0;
+
+    for (size_t pos = text.find(needle); pos != std::string::npos; pos = text.find(needle, pos + needle.size())){
+        count++;
+    }
+
+    return count;
+}
+
+
 TEST_CASE("pragc compiles a .pragma file to output.c"){
 
     std::remove("output.c");
@@ -193,4 +232,71 @@ TEST_CASE("pragc with no --compile does not build output.o"){
 
     std::ifstream object_file("output.o");
     CHECK_FALSE(object_file.good());
+}
+
+
+// Accept cases: each program must pass every check, generate C that compiles
+// under -Wall -Werror, and carry exactly the expected OpenMP clause.
+
+TEST_CASE("a name first assigned in a parallel body is private even if an earlier loop declared it", "[parallel][.known-bug]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_private_after_loop_true.pragma");
+
+    CHECK(count_occurrences(output, "#pragma omp parallel for\n") == 1);
+    CHECK(count_occurrences(output, "reduction") == 0);
+}
+
+
+TEST_CASE("duplicate reductions on one variable emit a single clause", "[parallel][.known-bug]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_dup_reduction_true.pragma");
+
+    CHECK(count_occurrences(output, "reduction(") == 1);
+    CHECK(count_occurrences(output, "reduction(+:s)") == 1);
+}
+
+
+TEST_CASE("a reduction inside a nested loop is found", "[parallel][.known-bug]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_nested_reduction_true.pragma");
+
+    CHECK(count_occurrences(output, "reduction(+:s)") == 1);
+}
+
+
+TEST_CASE("a written array indexed by the loop variable in a nested loop is accepted", "[parallel]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_nested_array_ok_true.pragma");
+
+    CHECK(count_occurrences(output, "#pragma omp parallel for\n") == 1);
+    CHECK(count_occurrences(output, "reduction") == 0);
+}
+
+
+TEST_CASE("arrays that are only read may use any index", "[parallel]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_read_only_array_any_index_true.pragma");
+
+    CHECK(count_occurrences(output, "#pragma omp parallel for\n") == 1);
+    CHECK(count_occurrences(output, "reduction") == 0);
+}
+
+
+TEST_CASE("a float reduction gets a reduction clause", "[parallel]"){
+
+    FileCleanup cleanup{{"output.c", "output.o"}};
+
+    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_float_reduction_true.pragma");
+
+    CHECK(count_occurrences(output, "reduction(+:s)") == 1);
 }
