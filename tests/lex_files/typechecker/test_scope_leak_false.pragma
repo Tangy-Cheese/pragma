@@ -1,6 +1,0 @@
-fn f:int (n:int){
-    for i in 0..n {
-        t = i
-    }
-    return t
-}

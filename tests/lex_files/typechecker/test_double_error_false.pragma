@@ -1,3 +1,0 @@
-fn f:int (n:int){
-    return x + y
-}

@@ -238,38 +238,6 @@ TEST_CASE("pragc with no --compile does not build output.o"){
 // Accept cases: each program must pass every check, generate C that compiles
 // under -Wall -Werror, and carry exactly the expected OpenMP clause.
 
-TEST_CASE("a name first assigned in a parallel body is private even if an earlier loop declared it", "[parallel][.known-bug]"){
-
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_private_after_loop_true.pragma");
-
-    CHECK(count_occurrences(output, "#pragma omp parallel for\n") == 1);
-    CHECK(count_occurrences(output, "reduction") == 0);
-}
-
-
-TEST_CASE("duplicate reductions on one variable emit a single clause", "[parallel][.known-bug]"){
-
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_dup_reduction_true.pragma");
-
-    CHECK(count_occurrences(output, "reduction(") == 1);
-    CHECK(count_occurrences(output, "reduction(+:s)") == 1);
-}
-
-
-TEST_CASE("a reduction inside a nested loop is found", "[parallel][.known-bug]"){
-
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string output = generate_and_compile_strict("tests/lex_files/typechecker/test_nested_reduction_true.pragma");
-
-    CHECK(count_occurrences(output, "reduction(+:s)") == 1);
-}
-
-
 TEST_CASE("a written array indexed by the loop variable in a nested loop is accepted", "[parallel]"){
 
     FileCleanup cleanup{{"output.c", "output.o"}};

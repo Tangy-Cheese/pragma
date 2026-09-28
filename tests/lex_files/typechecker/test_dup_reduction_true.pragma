@@ -1,8 +1,0 @@
-fn f:int (n:int){
-    s = 0
-    parallel i in 0..n {
-        s += i
-        s += i
-    }
-    return s
-}

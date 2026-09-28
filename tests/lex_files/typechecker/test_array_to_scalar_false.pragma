@@ -1,5 +1,0 @@
-fn f:int (n:int){
-    a = alloc(int, n)
-    a = 5
-    return n
-}

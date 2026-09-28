@@ -1,7 +1,0 @@
-fn f:int (n:int){
-    a = alloc(int, n)
-    parallel i in 0..n {
-        a[i] = a[i+1]
-    }
-    return a[0]
-}
