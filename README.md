@@ -1,6 +1,8 @@
 # pragma
 
 [![CI](https://github.com/Tangy-Cheese/pragma/actions/workflows/ci.yml/badge.svg)](https://github.com/Tangy-Cheese/pragma/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/Tangy-Cheese/pragma)](LICENSE)
+![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
 
 Pragma is a DSL for heavy numerical/HPC code that compiles to parallelised
 OpenMP C. "C without pointers, with automatic parallelism" — you write
