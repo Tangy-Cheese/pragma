@@ -59,8 +59,11 @@ int main(int argc, char** argv){
     std::vector<std::unique_ptr<TypeChecker>> checkers;
     bool has_errors = program_diagnostics.has_errors();
 
+    // First pass: every signature is known before any body is checked.
+    auto signatures = collect_signatures(funcs);
+
     for (auto& func: funcs){
-        checkers.push_back(std::make_unique<TypeChecker>(func.get()));
+        checkers.push_back(std::make_unique<TypeChecker>(func.get(), signatures));
         checkers.back()->checker();
         has_errors = has_errors || checkers.back()->get_diagnostics().has_errors();
     }

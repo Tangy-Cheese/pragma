@@ -7,11 +7,26 @@
 #include <optional>
 #include <vector>
 
+struct func_signature{
+    TokenType return_type;
+    std::vector<TokenType> param_types;
+};
+
+/**
+ * @brief Builds a table of every function's signature, before any body is
+ *  checked, so a call can refer to a function defined later in the file.
+ *
+ * @param funcs Every parsed function, in source order.
+ * @return Map from function name to its signature. On duplicate names the
+ *  first definition is kept.
+ */
+std::unordered_map<std::string, func_signature> collect_signatures(const std::vector<std::unique_ptr<func_node>>& funcs);
+
 class TypeChecker{
 
 public:
 
-    TypeChecker(func_node*);
+    TypeChecker(func_node*, const std::unordered_map<std::string, func_signature>& signatures = {});
     ~TypeChecker();
 
     /**
@@ -57,6 +72,7 @@ private:
     std::unordered_map<std::string, TokenType> env;
     std::unordered_map<std::string, TokenType> array_env;
     std::unordered_map<parallel_node*, std::vector<std::string>> parallel_clauses;
+    std::unordered_map<std::string, func_signature> signatures;
     DiagnosticCollector diagnostics;
 
     /**

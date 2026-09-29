@@ -5,8 +5,28 @@
 #include <iostream>
 #include <optional>
 
-TypeChecker::TypeChecker(func_node* function_node){
+std::unordered_map<std::string, func_signature> collect_signatures(const std::vector<std::unique_ptr<func_node>>& funcs){
+
+    std::unordered_map<std::string, func_signature> table;
+
+    for (auto& func: funcs){
+
+        func_signature sig;
+        sig.return_type = func->return_type;
+
+        for (auto& param: func->param_ptrs){
+            sig.param_types.push_back(param->param_type);
+        }
+
+        table.insert({func->token.literal, sig});
+    }
+    return table;
+}
+
+
+TypeChecker::TypeChecker(func_node* function_node, const std::unordered_map<std::string, func_signature>& signatures){
     root = function_node;
+    this->signatures = signatures;
 }
 
 TypeChecker::~TypeChecker(){}
