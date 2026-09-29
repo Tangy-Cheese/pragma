@@ -73,16 +73,19 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    // Temporary: only the first function is generated until generate_program() exists.
-    func_node* ast = funcs[0].get();
-
     {
+        std::vector<func_unit> units;
+
+        for (size_t i=0; i<funcs.size(); i++){
+            units.push_back({funcs[i].get(), checkers[i]->get_env(), checkers[i]->get_parallel_clauses()});
+        }
+
         CodeGenerator g;
-        g.starting_node = ast;
-        g.env = checkers[0]->get_env();
-        g.parallel_clauses = checkers[0]->get_parallel_clauses();
-        g.generate();
+        g.generate_program(units);
     }
+
+    // Temporary: --run drives the first function until top-level code becomes main.
+    func_node* ast = funcs[0].get();
 
     std::cout << "Generated output.c" << std::endl;
 

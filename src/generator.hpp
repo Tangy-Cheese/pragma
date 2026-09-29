@@ -9,6 +9,12 @@
 #include <unordered_map>
 #include <vector>
 
+struct func_unit{
+    func_node* func;
+    std::unordered_map<std::string, TokenType> env;
+    std::unordered_map<parallel_node*, std::vector<std::string>> parallel_clauses;
+};
+
 class CodeGenerator{
 
 public:
@@ -19,6 +25,14 @@ public:
      * @brief Runs generate_func on starting_node.
      */
     void generate();
+
+    /**
+     * @brief Writes the includes once, then generates every function with
+     *  its own env and parallel clauses.
+     *
+     * @param units One func_unit per function, in source order.
+     */
+    void generate_program(std::vector<func_unit>& units);
 
     func_node* starting_node;
 

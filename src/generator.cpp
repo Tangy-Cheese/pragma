@@ -43,6 +43,21 @@ void CodeGenerator::generate(){
 }
 
 
+void CodeGenerator::generate_program(std::vector<func_unit>& units){
+
+    out_stream << "#include <stdlib.h>\n\n";
+
+    for (size_t i=0; i<units.size(); i++){
+
+        if (i>0) out_stream << "\n";
+
+        env = units[i].env;
+        parallel_clauses = units[i].parallel_clauses;
+        generate_func(units[i].func);
+    }
+}
+
+
 void CodeGenerator::generate_func(func_node* ptr){
 
     declared_vars.clear();
