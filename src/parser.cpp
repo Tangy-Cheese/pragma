@@ -160,10 +160,26 @@ std::unique_ptr<AST_node> Parser::stmtparse(){
     else if (peek().token_type == TokenType::PARALLEL){
         return parallelparse();
     }
+    else if (peek().token_type == TokenType::PRINT){
+        return printparse();
+    }
 
     std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
     advance();
     return nullptr;
+}
+
+
+std::unique_ptr<print_node> Parser::printparse(){
+
+    std::unique_ptr<print_node> print_ptr = std::make_unique<print_node>();
+
+    print_ptr->token = peek();
+    expect(TokenType::PRINT);
+
+    print_ptr->expr_ptr = parse_expr(0);
+
+    return print_ptr;
 }
 
 

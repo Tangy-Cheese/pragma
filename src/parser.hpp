@@ -20,6 +20,7 @@ struct alloc_node;
 struct index_node;
 struct parallel_node;
 struct call_node;
+struct print_node;
 
 class Parser{
 public:
@@ -71,11 +72,16 @@ public:
     std::unique_ptr<block_node> blockparse();
 
     /**
-     * @brief Parses one statement (assignment, for loop or parallel loop).
+     * @brief Parses one statement (assignment, for loop, parallel loop or out).
      *
      * @return The statement's node, or nullptr after reporting an unsupported statement.
      */
     std::unique_ptr<AST_node> stmtparse();
+
+    /**
+     * @brief Parses an `out expr` statement into a print_node.
+     */
+    std::unique_ptr<print_node> printparse();
 
     /**
      * @brief Parses a return statement into a return_node.
@@ -182,6 +188,10 @@ struct index_node: public AST_node{
 struct call_node: public AST_node{
     // token holds the called function's identifier
     std::vector<std::unique_ptr<AST_node>> arg_ptrs;
+};
+
+struct print_node: public AST_node{
+    std::unique_ptr<AST_node> expr_ptr;
 };
 
 struct for_node: public AST_node{
