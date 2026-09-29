@@ -46,6 +46,13 @@ public:
     void expect(TokenType expected);
 
     /**
+     * @brief Parses every top-level function in the token stream.
+     *
+     * @return Vector of function ASTs in source order.
+     */
+    std::vector<std::unique_ptr<func_node>> programparse();
+
+    /**
      * @brief Returns the pointer to the starting node of the functional abstract syntax tree.
      */
     std::unique_ptr<func_node> funcparse();

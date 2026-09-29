@@ -38,7 +38,26 @@ void Parser::expect(TokenType expected){
     }
 }
 
-    
+
+std::vector<std::unique_ptr<func_node>> Parser::programparse(){
+
+    std::vector<std::unique_ptr<func_node>> funcs;
+
+    while (curr_element < tokens.size()){
+
+        // expect() doesn't advance on failure, so a stray token would loop forever.
+        if (peek().token_type != TokenType::FUNC){
+            std::cerr << "Error: expected function definition (row "
+                      << peek().row_idx << ")." << std::endl;
+            break;
+        }
+
+        funcs.push_back(funcparse());
+    }
+    return funcs;
+}
+
+
 std::unique_ptr<func_node> Parser::funcparse(){
     
     expect(TokenType::FUNC);
