@@ -51,7 +51,7 @@ int main(int argc, char** argv){
     for (auto& func: funcs){
         if (!func_names.insert(func->token.literal).second){
             program_diagnostics.add(func->token.row_idx,
-                "duplicate function name '" + func->token.literal + "'.");
+                "duplicate function name '" + func->token.literal + "'");
         }
     }
 

@@ -303,6 +303,46 @@ std::optional<TokenType> TypeChecker::check_expr(AST_node* node){
 
         diagnostics.add(bin->token.row_idx, "mismatched operand types around '" + bin->token.literal + "'");
     }
-    
+
+    if (auto* call = dynamic_cast<call_node*>(node)){
+
+        auto found = signatures.find(call->token.literal);
+
+        if (found == signatures.end()){
+            diagnostics.add(call->token.row_idx, "call to undeclared function '" + call->token.literal + "'");
+            return std::nullopt;
+        }
+
+        const func_signature& sig = found->second;
+
+        if (call->arg_ptrs.size() != sig.param_types.size()){
+            diagnostics.add(call->token.row_idx, "function '" + call->token.literal + "' expects "
+                             + std::to_string(sig.param_types.size()) + " argument(s) but got "
+                             + std::to_string(call->arg_ptrs.size()));
+            return std::nullopt;
+        }
+
+        bool args_ok = true;
+
+        for (size_t i=0; i<call->arg_ptrs.size(); i++){
+
+            std::optional<TokenType> arg_type = check_expr(call->arg_ptrs[i].get());
+
+            // nullopt means the argument already reported its own error
+            if (arg_type == std::nullopt){
+                args_ok = false;
+            }
+            else if (arg_type != sig.param_types[i]){
+                diagnostics.add(call->token.row_idx, "argument " + std::to_string(i+1) + " of call to '"
+                                 + call->token.literal + "' has the wrong type");
+                args_ok = false;
+            }
+        }
+
+        if (!args_ok) return std::nullopt;
+
+        return sig.return_type;
+    }
+
     return std::nullopt;
 }
