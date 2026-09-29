@@ -99,6 +99,12 @@ private:
     void generate_return(return_node*);
 
     /**
+     * @brief Generates a printf call from a print_node, using the value
+     *  type the type checker recorded on it.
+     */
+    void generate_print(print_node*);
+
+    /**
      * @brief Generates a C expression string from an AST_node.
      */
     std::string gen_expr(AST_node*);

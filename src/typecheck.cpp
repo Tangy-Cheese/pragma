@@ -163,7 +163,29 @@ void TypeChecker::check_stmts(std::vector<std::unique_ptr<AST_node>>& stmts){
         else if (auto* parallel_stmt = dynamic_cast<parallel_node*>(stmt.get())){
             check_parallel(parallel_stmt);
         }
+
+        else if (auto* print = dynamic_cast<print_node*>(stmt.get())){
+            check_print(print);
+        }
     }
+}
+
+void TypeChecker::check_print(print_node* ptr){
+
+    std::optional<TokenType> value_type = check_expr(ptr->expr_ptr.get());
+
+    if (value_type == std::nullopt){
+        diagnostics.add(ptr->token.row_idx, "could not determine the type of the value passed to out");
+        return;
+    }
+
+    if (value_type != TokenType::INT_TYPE && value_type != TokenType::FLOAT_TYPE &&
+        value_type != TokenType::DOUBLE_TYPE){
+        diagnostics.add(ptr->token.row_idx, "out only supports int, float and double values");
+        return;
+    }
+
+    ptr->value_type = *value_type;
 }
 
 void TypeChecker::check_for(for_node* ptr){

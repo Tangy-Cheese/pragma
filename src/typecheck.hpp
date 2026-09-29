@@ -100,6 +100,12 @@ private:
     void check_parallel(parallel_node*);
 
     /**
+     * @brief Type checks an out statement and records the printed value's
+     *  type on the node, so codegen can pick the printf format.
+     */
+    void check_print(print_node*);
+
+    /**
      * @brief Recursively type checks an expression node.
      *
      * @return Resulting type of the expression, or nullopt on error.

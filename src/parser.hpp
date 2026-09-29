@@ -192,6 +192,7 @@ struct call_node: public AST_node{
 
 struct print_node: public AST_node{
     std::unique_ptr<AST_node> expr_ptr;
+    TokenType value_type; // filled in by the type checker; picks the printf format
 };
 
 struct for_node: public AST_node{

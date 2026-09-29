@@ -38,14 +38,14 @@ CodeGenerator::~CodeGenerator(){}
 
 
 void CodeGenerator::generate(){
-    out_stream << "#include <stdlib.h>\n\n";
+    out_stream << "#include <stdio.h>\n#include <stdlib.h>\n\n";
     generate_func(starting_node);
 }
 
 
 void CodeGenerator::generate_program(std::vector<func_unit>& units){
 
-    out_stream << "#include <stdlib.h>\n\n";
+    out_stream << "#include <stdio.h>\n#include <stdlib.h>\n\n";
 
     // C needs a declaration before the first call; pragma allows calls in any order.
     for (auto& unit: units){
@@ -123,7 +123,20 @@ void CodeGenerator::generate_stmts(std::vector<std::unique_ptr<AST_node>>& stmts
         else if (auto* parallel_stmt = dynamic_cast<parallel_node*>(stmt.get())){
             generate_parallel(parallel_stmt);
         }
+
+        else if (auto* print = dynamic_cast<print_node*>(stmt.get())){
+            generate_print(print);
+        }
     }
+}
+
+
+void CodeGenerator::generate_print(print_node* ptr){
+
+    // float is promoted to double when passed to printf, so %f covers both.
+    std::string format = (ptr->value_type == TokenType::INT_TYPE) ? "%d" : "%f";
+
+    out_stream << "    printf(\"" << format << "\\n\", " << gen_expr(ptr->expr_ptr.get()) << ");\n";
 }
 
 
