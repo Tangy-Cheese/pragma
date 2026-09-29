@@ -8,7 +8,9 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 int main(int argc, char** argv){
 
@@ -35,21 +37,50 @@ int main(int argc, char** argv){
     auto tokens = l.get_token_vector();
 
     Parser p(tokens);
-    std::unique_ptr<func_node> ast = p.funcparse();
+    std::vector<std::unique_ptr<func_node>> funcs = p.programparse();
 
-    TypeChecker t(ast.get());
-    t.checker();
-
-    if (t.get_diagnostics().has_errors()){
-        t.get_diagnostics().print_all();
+    if (funcs.empty()){
+        std::cerr << "Error: no function definitions found." << std::endl;
         return 1;
     }
 
+    // Program-level checks that span functions, separate from each TypeChecker's own.
+    DiagnosticCollector program_diagnostics;
+    std::set<std::string> func_names;
+
+    for (auto& func: funcs){
+        if (!func_names.insert(func->token.literal).second){
+            program_diagnostics.add(func->token.row_idx,
+                "duplicate function name '" + func->token.literal + "'.");
+        }
+    }
+
+    // Checkers outlive this loop: codegen needs each function's own env and clauses.
+    std::vector<std::unique_ptr<TypeChecker>> checkers;
+    bool has_errors = program_diagnostics.has_errors();
+
+    for (auto& func: funcs){
+        checkers.push_back(std::make_unique<TypeChecker>(func.get()));
+        checkers.back()->checker();
+        has_errors = has_errors || checkers.back()->get_diagnostics().has_errors();
+    }
+
+    if (has_errors){
+        program_diagnostics.print_all();
+        for (auto& t: checkers){
+            t->get_diagnostics().print_all();
+        }
+        return 1;
+    }
+
+    // Temporary: only the first function is generated until generate_program() exists.
+    func_node* ast = funcs[0].get();
+
     {
         CodeGenerator g;
-        g.starting_node = ast.get();
-        g.env = t.get_env();
-        g.parallel_clauses = t.get_parallel_clauses();
+        g.starting_node = ast;
+        g.env = checkers[0]->get_env();
+        g.parallel_clauses = checkers[0]->get_parallel_clauses();
         g.generate();
     }
 
