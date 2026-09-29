@@ -19,4 +19,7 @@ enum class TokenType{
 
     //types
     INT_TYPE, DOUBLE_TYPE, FLOAT_TYPE, BOOL_TYPE, COMPLEX_TYPE,
+
+    //returned by Parser::peek() past the last token, never produced by the lexer
+    END_OF_FILE,
 };

@@ -38,21 +38,29 @@ int main(int argc, char** argv){
 
     Parser p(tokens);
     std::vector<std::unique_ptr<func_node>> funcs = p.programparse();
-
-    if (funcs.empty()){
-        std::cerr << "Error: no function definitions found." << std::endl;
-        return 1;
-    }
+    std::unique_ptr<func_node> main_func = p.take_main();
 
     // Program-level checks that span functions, separate from each TypeChecker's own.
     DiagnosticCollector program_diagnostics;
     std::set<std::string> func_names;
 
     for (auto& func: funcs){
-        if (!func_names.insert(func->token.literal).second){
+        if (func->token.literal == "main"){
+            program_diagnostics.add(func->token.row_idx,
+                "'main' is reserved: code outside any function becomes main");
+        }
+        else if (!func_names.insert(func->token.literal).second){
             program_diagnostics.add(func->token.row_idx,
                 "duplicate function name '" + func->token.literal + "'");
         }
+    }
+
+    // Added after the name checks, so the generated main isn't flagged as a user's main.
+    if (main_func) funcs.push_back(std::move(main_func));
+
+    if (funcs.empty()){
+        std::cerr << "Error: nothing to compile." << std::endl;
+        return 1;
     }
 
     // Checkers outlive this loop: codegen needs each function's own env and clauses.

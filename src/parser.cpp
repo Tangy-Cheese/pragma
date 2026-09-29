@@ -18,6 +18,11 @@ Parser::~Parser(){}
 
 
 Token Parser::peek(){
+
+    if (curr_element >= tokens.size()){
+        size_t last_row = tokens.empty() ? 0 : tokens.back().row_idx;
+        return {TokenType::END_OF_FILE, "", last_row};
+    }
     return tokens[curr_element];
 }
 
@@ -29,12 +34,12 @@ void Parser::advance(){
 
 void Parser::expect(TokenType expected){
     
-    if (tokens[curr_element].token_type == expected){
+    if (peek().token_type == expected){
         curr_element++;
     }
     else{
         std::cerr << "Error: syntax error, unexpected token (row "
-                  << tokens[curr_element].row_idx << ")." << std::endl;
+                  << peek().row_idx << ")." << std::endl;
     }
 }
 
@@ -42,19 +47,45 @@ void Parser::expect(TokenType expected){
 std::vector<std::unique_ptr<func_node>> Parser::programparse(){
 
     std::vector<std::unique_ptr<func_node>> funcs;
+    std::vector<std::unique_ptr<AST_node>> top_level_stmts;
+    size_t main_row = 0;
 
     while (curr_element < tokens.size()){
 
-        // expect() doesn't advance on failure, so a stray token would loop forever.
-        if (peek().token_type != TokenType::FUNC){
-            std::cerr << "Error: expected function definition (row "
-                      << peek().row_idx << ")." << std::endl;
-            break;
+        if (peek().token_type == TokenType::FUNC){
+            funcs.push_back(funcparse());
         }
+        else{
+            if (top_level_stmts.empty()) main_row = peek().row_idx;
 
-        funcs.push_back(funcparse());
+            // stmtparse always consumes at least one token, so this can't loop forever.
+            auto stmt = stmtparse();
+            if (stmt) top_level_stmts.push_back(std::move(stmt));
+        }
+    }
+
+    if (!top_level_stmts.empty()){
+
+        // Top-level code becomes: int main(){ <statements> return 0; }
+        main_func = std::make_unique<func_node>();
+        main_func->token = {TokenType::IDENTIFIER, "main", main_row};
+        main_func->return_type = TokenType::INT_TYPE;
+
+        main_func->block_ptr = std::make_unique<block_node>();
+        main_func->block_ptr->body_ptrs = std::move(top_level_stmts);
+
+        auto zero = std::make_unique<var_node>();
+        zero->token = {TokenType::INT_LIT, "0", main_row};
+
+        main_func->block_ptr->return_ptr = std::make_unique<return_node>();
+        main_func->block_ptr->return_ptr->expr_ptr = std::move(zero);
     }
     return funcs;
+}
+
+
+std::unique_ptr<func_node> Parser::take_main(){
+    return std::move(main_func);
 }
 
 
@@ -101,7 +132,7 @@ std::vector<std::unique_ptr<param_node>> Parser::paramparse(){
     // parses a list until right parenthesis
     std::vector<std::unique_ptr<param_node>> param_ptrs;
 
-    while (peek().token_type != TokenType::R_PAREN){
+    while (peek().token_type != TokenType::R_PAREN && peek().token_type != TokenType::END_OF_FILE){
 
         if (peek().token_type == TokenType::COMMA){
             advance();
@@ -130,7 +161,7 @@ std::unique_ptr<block_node> Parser::blockparse(){
     std::unique_ptr<block_node> block_ptr = std::make_unique<block_node>();
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
-    while (peek().token_type != TokenType::R_CURLY){
+    while (peek().token_type != TokenType::R_CURLY && peek().token_type != TokenType::END_OF_FILE){
 
         // conditional parser? curerntly empty.
 
@@ -244,7 +275,7 @@ std::unique_ptr<for_node> Parser::forparse(){
 
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
-    while (peek().token_type != TokenType::R_CURLY){
+    while (peek().token_type != TokenType::R_CURLY && peek().token_type != TokenType::END_OF_FILE){
         auto stmt = stmtparse();
         if (stmt) body_nodes.push_back(std::move(stmt));
     }
@@ -276,7 +307,7 @@ std::unique_ptr<parallel_node> Parser::parallelparse(){
 
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
-    while (peek().token_type != TokenType::R_CURLY){
+    while (peek().token_type != TokenType::R_CURLY && peek().token_type != TokenType::END_OF_FILE){
         auto stmt = stmtparse();
         if (stmt) body_nodes.push_back(std::move(stmt));
     }

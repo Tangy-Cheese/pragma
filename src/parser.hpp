@@ -48,11 +48,21 @@ public:
     void expect(TokenType expected);
 
     /**
-     * @brief Parses every top-level function in the token stream.
+     * @brief Parses every top-level function in the token stream. Any other
+     *  top-level statements are collected into a generated main, see take_main.
      *
-     * @return Vector of function ASTs in source order.
+     * @return Vector of the user's function ASTs in source order.
      */
     std::vector<std::unique_ptr<func_node>> programparse();
+
+    /**
+     * @brief Hands over the main function built from top-level statements by
+     *  programparse. Kept apart from the user's functions so the caller can
+     *  tell it apart from a user function that is also named main.
+     *
+     * @return The generated main, or nullptr if the file has no top-level code.
+     */
+    std::unique_ptr<func_node> take_main();
 
     /**
      * @brief Returns the pointer to the starting node of the functional abstract syntax tree.
@@ -132,6 +142,7 @@ public:
 private:
     size_t curr_element;
     std::vector<Token> tokens;
+    std::unique_ptr<func_node> main_func;
 };
 
 struct AST_node{
