@@ -71,12 +71,26 @@ pragc <input.pragma> [--compile] [--run]
 
 - (no flags) — emits `output.c`
 - `--compile` — also compiles `output.c` to `output.o` (`gcc -std=c99 -fopenmp -c`)
-- `--run` — synthesizes a `driver.c` with a `main()` calling the **first**
-  function in the file with default args, links it against `output.c`, and
-  runs the binary. Only scalar (`int`/`float`/`double`) params and return
-  types are supported.
+- `--run` — builds `output.c` into `output_bin` and runs it. Needs code
+  outside any function (see below).
 
-A file can hold several functions; see `examples/kernels.pragma`.
+A file can hold several functions, which can call each other. Code outside
+any function becomes `main`, and `out <expr>` prints a value:
+
+```
+fn square:int (x:int){
+    return x*x
+}
+
+total = 0
+for i in 0..10 {
+    total += square(i)
+}
+out total
+```
+
+A file with only functions has no `main`; it can still be compiled with
+`--compile` and linked from C. See `examples/kernels.pragma`.
 
 ## Example
 

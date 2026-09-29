@@ -88,3 +88,13 @@ fn matvec:int (n:int){
     }
     return y[n-1]
 }
+
+n = 10
+out sum_squares(n)
+out factorial(n)
+out mod_checksum(n, 3)
+out prefix_sum(n)
+out dot(n)
+out saxpy(n)
+out stencil(n)
+out matvec(n)
