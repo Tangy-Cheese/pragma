@@ -47,6 +47,13 @@ void CodeGenerator::generate_program(std::vector<func_unit>& units){
 
     out_stream << "#include <stdlib.h>\n\n";
 
+    // C needs a declaration before the first call; pragma allows calls in any order.
+    for (auto& unit: units){
+        generate_signature(unit.func);
+        out_stream << ";\n";
+    }
+    out_stream << "\n";
+
     for (size_t i=0; i<units.size(); i++){
 
         if (i>0) out_stream << "\n";
@@ -66,6 +73,17 @@ void CodeGenerator::generate_func(func_node* ptr){
         declared_vars.insert(param->token.literal);
     }
 
+    generate_signature(ptr);
+    out_stream << "{\n";
+
+    generate_block(ptr->block_ptr.get());
+
+    out_stream << "}\n";
+}
+
+
+void CodeGenerator::generate_signature(func_node* ptr){
+
     out_stream << type_string[ptr->return_type] << " " << ptr->token.literal << "(";
 
     for (size_t i=0; i<ptr->param_ptrs.size(); i++){
@@ -76,11 +94,7 @@ void CodeGenerator::generate_func(func_node* ptr){
         out_stream << type_string[param->param_type] << " " << param->token.literal;
     }
 
-    out_stream << "){\n";
-
-    generate_block(ptr->block_ptr.get());
-
-    out_stream << "}\n";
+    out_stream << ")";
 }
 
 
@@ -198,6 +212,17 @@ std::string CodeGenerator::gen_expr(AST_node* node){
 
     if (auto* bin = dynamic_cast<bin_expr_node*>(node)){
         return "(" + gen_expr(bin->var1_ptr.get()) + " " + operator_string[bin->operand] + " " + gen_expr(bin->var2_ptr.get()) + ")";
+    }
+
+    if (auto* call = dynamic_cast<call_node*>(node)){
+
+        std::string args;
+
+        for (size_t i=0; i<call->arg_ptrs.size(); i++){
+            if (i>0) args += ", ";
+            args += gen_expr(call->arg_ptrs[i].get());
+        }
+        return call->token.literal + "(" + args + ")";
     }
 
     std::cerr << "Error: unrecognized expression node (row " << node->token.row_idx << ")." << std::endl;

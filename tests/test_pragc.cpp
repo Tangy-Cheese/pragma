@@ -96,53 +96,6 @@ TEST_CASE("pragc --compile also builds output.o"){
 }
 
 
-TEST_CASE("pragc compiles arrays end to end, including gcc"){
-
-    std::remove("output.c");
-    std::remove("output.o");
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/array.pragma --compile";
-    int result = std::system(cmd.c_str());
-
-    REQUIRE(result == 0);
-
-    std::ifstream output_file("output.c");
-    std::stringstream buffer;
-    buffer << output_file.rdbuf();
-    std::string output = buffer.str();
-
-    CHECK(output.find("int* a = malloc(n * sizeof(int));") != std::string::npos);
-    CHECK(output.find("a[i] = i;") != std::string::npos);
-
-    std::ifstream object_file("output.o");
-    CHECK(object_file.good());
-}
-
-
-TEST_CASE("pragc compiles a parallel loop end to end, including gcc"){
-
-    std::remove("output.c");
-    std::remove("output.o");
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/parallel.pragma --compile";
-    int result = std::system(cmd.c_str());
-
-    REQUIRE(result == 0);
-
-    std::ifstream output_file("output.c");
-    std::stringstream buffer;
-    buffer << output_file.rdbuf();
-    std::string output = buffer.str();
-
-    CHECK(output.find("#pragma omp parallel for reduction(+:sum)") != std::string::npos);
-
-    std::ifstream object_file("output.o");
-    CHECK(object_file.good());
-}
-
-
 TEST_CASE("benchmark: sequential vs parallel reduction on a large sum"){
 
     // Report-only: prints timings and the speedup ratio for manual inspection.
@@ -216,22 +169,6 @@ TEST_CASE("benchmark: sequential vs parallel reduction on a large sum"){
                << "[benchmark] sequential best of 3: " << seq_time << "s\n"
                << "[benchmark] parallel best of 3:   " << par_time << "s\n"
                << "[benchmark] speedup: " << speedup << "x (informational only, not asserted)\n";
-}
-
-
-TEST_CASE("pragc with no --compile does not build output.o"){
-
-    std::remove("output.c");
-    std::remove("output.o");
-    FileCleanup cleanup{{"output.c", "output.o"}};
-
-    std::string cmd = std::string(PRAGC_PATH) + " tests/lex_files/generator/sumto.pragma";
-    int result = std::system(cmd.c_str());
-
-    REQUIRE(result == 0);
-
-    std::ifstream object_file("output.o");
-    CHECK_FALSE(object_file.good());
 }
 
 

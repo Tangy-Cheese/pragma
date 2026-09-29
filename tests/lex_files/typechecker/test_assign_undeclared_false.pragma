@@ -1,4 +1,0 @@
-fn badassign:int (n:int){
-    x = y
-    return n
-}

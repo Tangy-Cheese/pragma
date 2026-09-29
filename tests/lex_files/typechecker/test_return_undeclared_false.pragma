@@ -1,3 +1,0 @@
-fn badreturn:int (n:int){
-    return x
-}

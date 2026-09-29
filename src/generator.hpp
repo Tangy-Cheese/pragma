@@ -60,6 +60,12 @@ private:
     void generate_func(func_node*);
 
     /**
+     * @brief Writes a function's return type, name and parameter list, e.g.
+     *  "int add(int a, int b)", with no trailing ';' or '{'.
+     */
+    void generate_signature(func_node*);
+
+    /**
      * @brief Generates C code for a block node's statements.
      */
     void generate_block(block_node*);

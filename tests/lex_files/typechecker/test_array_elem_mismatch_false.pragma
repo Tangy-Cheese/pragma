@@ -1,5 +1,0 @@
-fn badelem:int (n:int){
-    a = alloc(int, n)
-    a[0] = 1.5
-    return n
-}

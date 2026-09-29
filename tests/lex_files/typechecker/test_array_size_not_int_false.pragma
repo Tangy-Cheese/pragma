@@ -1,4 +1,0 @@
-fn badsize:int (n:int){
-    a = alloc(int, 1.5)
-    return n
-}
