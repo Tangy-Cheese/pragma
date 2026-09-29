@@ -15,6 +15,22 @@ TEST_CASE("Test single chars"){
     REQUIRE(tokens[0].literal == "fn");
 }
 
+TEST_CASE("Test underscores in identifiers"){
+
+    Lexer l("tests/lex_files/test_underscore.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    REQUIRE(tokens.size() == 4);
+    REQUIRE(tokens[0].token_type == TokenType::IDENTIFIER);
+    REQUIRE(tokens[0].literal == "sum_squares");
+    REQUIRE(tokens[1].literal == "_tmp");
+    REQUIRE(tokens[2].literal == "a_b_");
+    REQUIRE(tokens[3].token_type == TokenType::IDENTIFIER);
+    REQUIRE(tokens[3].literal == "fn_x");
+}
+
 TEST_CASE("Test add function"){
     
     Lexer add("tests/lex_files/test_add.pragma");

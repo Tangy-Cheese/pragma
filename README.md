@@ -30,8 +30,38 @@ cmake -B build
 cmake --build build
 ```
 
-Produces `build/bin/pragc` plus test binaries (`TestLexer`, `TestParser`,
-`TestTypechecker`, `TestGenerator`, `TestPragc`), run via `ctest` from `build/`.
+Produces the compiler at `build/bin/pragc`, plus the test binaries.
+
+## Testing
+
+Build first (see above), then:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Or from inside `build/`, just `ctest`. `--output-on-failure` prints the Catch2
+output for any test that fails; without it you only see pass/fail.
+
+| ctest name    | What it covers                                           |
+|---------------|----------------------------------------------------------|
+| `Lexer`       | tokenising `.pragma` source                              |
+| `Parser`      | building the AST                                         |
+| `Typechecker` | type errors and parallel-safety (accept/reject fixtures) |
+| `Generator`   | emitted C code                                           |
+| `Pragc`       | the `pragc` CLI end to end                               |
+| `Runtime`     | generated OpenMP code actually runs with multiple threads |
+
+Useful variants:
+
+```bash
+ctest --test-dir build -R Lexer            # run one test by name (regex)
+ctest --test-dir build -V                  # verbose: show all output
+./build/bin/TestTypechecker "<test name>"  # run one Catch2 TEST_CASE directly
+```
+
+Tests run from the repo root, so fixture paths like `tests/lex_files/...` resolve.
+Run the Catch2 binaries directly from the repo root too.
 
 ## Usage
 
@@ -41,10 +71,12 @@ pragc <input.pragma> [--compile] [--run]
 
 - (no flags) — emits `output.c`
 - `--compile` — also compiles `output.c` to `output.o` (`gcc -std=c99 -fopenmp -c`)
-- `--run` — synthesizes a `driver.c` with a `main()` calling the parsed
-  function with default args, links it against `output.c`, and runs the
-  binary. Only scalar (`int`/`float`/`double`) params and return types are
-  supported — the parser produces one function per file, not a full program.
+- `--run` — synthesizes a `driver.c` with a `main()` calling the **first**
+  function in the file with default args, links it against `output.c`, and
+  runs the binary. Only scalar (`int`/`float`/`double`) params and return
+  types are supported.
+
+A file can hold several functions; see `examples/kernels.pragma`.
 
 ## Example
 

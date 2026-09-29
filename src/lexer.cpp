@@ -69,8 +69,8 @@ void Lexer::scan(){
             
             char _char = row_str[i];
             
-            if (isalpha(_char)){
-                while (isalpha(_char) && i<=N){
+            if (isalpha(_char) || _char == '_'){
+                while ((isalpha(_char) || _char == '_') && i<=N){
 
                     buffer.push_back(_char);
 

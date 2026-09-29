@@ -1,4 +1,4 @@
-fn sumsquares:int (n:int){
+fn sum_squares:int (n:int){
     s = 0
     parallel i in 0..n {
         s += i*i
@@ -14,7 +14,7 @@ fn factorial:int (n:int){
     return p
 }
 
-fn modchecksum:int (n:int, k:int){
+fn mod_checksum:int (n:int, k:int){
     s = 0
     parallel i in 0..n {
         s += i % k
@@ -22,7 +22,7 @@ fn modchecksum:int (n:int, k:int){
     return s
 }
 
-fn prefixsum:int (n:int){
+fn prefix_sum:int (n:int){
     a = alloc(int, n)
     a[0] = 0
     for i in 1..n {
