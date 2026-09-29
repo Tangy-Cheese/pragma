@@ -110,3 +110,42 @@ TEST_CASE("test parallel loop parsing"){
     REQUIRE(idx != nullptr);
     REQUIRE(idx->token.literal == "a");
 }
+
+TEST_CASE("test function call parsing"){
+
+    Lexer l("tests/lex_files/test_call.pragma");
+
+    l.scan();
+    auto tokens = l.get_token_vector();
+
+    Parser p(tokens);
+
+    std::vector<std::unique_ptr<func_node>> funcs = p.programparse();
+    REQUIRE(funcs.size() == 3);
+
+    auto& body = funcs[2]->block_ptr->body_ptrs;
+    REQUIRE(body.size() == 1);
+
+    // y = add(x, x*2): two args, the second is a full expression
+    auto* assign = dynamic_cast<assign_node*>(body[0].get());
+    REQUIRE(assign != nullptr);
+
+    auto* call = dynamic_cast<call_node*>(assign->expr_ptr.get());
+    REQUIRE(call != nullptr);
+    REQUIRE(call->token.literal == "add");
+    REQUIRE(call->arg_ptrs.size() == 2);
+    REQUIRE(dynamic_cast<var_node*>(call->arg_ptrs[0].get()) != nullptr);
+
+    auto* arg_bin = dynamic_cast<bin_expr_node*>(call->arg_ptrs[1].get());
+    REQUIRE(arg_bin != nullptr);
+    REQUIRE(arg_bin->operand == TokenType::ASTERISK);
+
+    // return zero() + y: a no-arg call nested inside a binary expression
+    auto* ret_bin = dynamic_cast<bin_expr_node*>(funcs[2]->block_ptr->return_ptr->expr_ptr.get());
+    REQUIRE(ret_bin != nullptr);
+
+    auto* zero_call = dynamic_cast<call_node*>(ret_bin->var1_ptr.get());
+    REQUIRE(zero_call != nullptr);
+    REQUIRE(zero_call->token.literal == "zero");
+    REQUIRE(zero_call->arg_ptrs.empty());
+}

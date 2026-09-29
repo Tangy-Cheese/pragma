@@ -1,0 +1,12 @@
+fn add:int (a:int, b:int){
+    return a+b
+}
+
+fn zero:int (){
+    return 0
+}
+
+fn use:int (x:int){
+    y = add(x, x*2)
+    return zero() + y
+}
