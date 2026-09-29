@@ -38,4 +38,7 @@ target_link_libraries(GeneratorLib PRIVATE ParserLib)
 add_executable(pragc src/main.cpp)
 target_link_libraries(pragc PRIVATE LexerLib ParserLib TypecheckLib GeneratorLib DiagnosticLib OpenMP::OpenMP_CXX)
 
+# `cmake --install build` copies pragc to <prefix>/bin (default prefix /usr/local).
+install(TARGETS pragc RUNTIME DESTINATION bin)
+
 add_subdirectory(tests)

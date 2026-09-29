@@ -26,6 +26,18 @@ cmake --build build
 ./build/bin/pragc examples/numerics.pragma --run
 ```
 
+To run it as plain `pragc` from anywhere, install it onto your `PATH`:
+
+```bash
+cmake --install build --prefix ~/.local    # just you: ~/.local/bin/pragc
+sudo cmake --install build                 # everyone: /usr/local/bin/pragc
+```
+
+`~/.local/bin` is on `PATH` by default on most Linux distros. If `pragc` isn't
+found, add `export PATH="$HOME/.local/bin:$PATH"` to your `~/.bashrc`.
+Re-run the install after rebuilding to pick up changes. `pragc` writes
+`output.c` (and `output_bin` with `--run`) into the directory you run it from.
+
 ## The language
 
 ```
