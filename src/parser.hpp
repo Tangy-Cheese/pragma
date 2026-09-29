@@ -71,6 +71,13 @@ public:
     std::unique_ptr<block_node> blockparse();
 
     /**
+     * @brief Parses one statement (assignment, for loop or parallel loop).
+     *
+     * @return The statement's node, or nullptr after reporting an unsupported statement.
+     */
+    std::unique_ptr<AST_node> stmtparse();
+
+    /**
      * @brief Parses a return statement into a return_node.
      */
     std::unique_ptr<return_node> returnparse();

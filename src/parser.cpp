@@ -137,24 +137,33 @@ std::unique_ptr<block_node> Parser::blockparse(){
         if (peek().token_type == TokenType::RETURN){
             block_ptr->return_ptr = returnparse(); //Should push forward to return body
         }
-        else if (peek().token_type == TokenType::IDENTIFIER){
-            body_nodes.push_back(assignparse());
-        }
-        else if (peek().token_type == TokenType::FOR){
-            body_nodes.push_back(forparse());
-        }
-        else if (peek().token_type == TokenType::PARALLEL){
-            body_nodes.push_back(parallelparse());
-        }
         else{
-            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
-            advance();
+            auto stmt = stmtparse();
+            if (stmt) body_nodes.push_back(std::move(stmt));
         }
     }
 
     block_ptr->body_ptrs = std::move(body_nodes);
 
     return block_ptr;
+}
+
+
+std::unique_ptr<AST_node> Parser::stmtparse(){
+
+    if (peek().token_type == TokenType::IDENTIFIER){
+        return assignparse();
+    }
+    else if (peek().token_type == TokenType::FOR){
+        return forparse();
+    }
+    else if (peek().token_type == TokenType::PARALLEL){
+        return parallelparse();
+    }
+
+    std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
+    advance();
+    return nullptr;
 }
 
 
@@ -220,20 +229,8 @@ std::unique_ptr<for_node> Parser::forparse(){
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
     while (peek().token_type != TokenType::R_CURLY){
-
-        if (peek().token_type == TokenType::IDENTIFIER){
-            body_nodes.push_back(assignparse());
-        }
-        else if (peek().token_type == TokenType::FOR){
-            body_nodes.push_back(forparse());
-        }
-        else if (peek().token_type == TokenType::PARALLEL){
-            body_nodes.push_back(parallelparse());
-        }
-        else{
-            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
-            advance();
-        }
+        auto stmt = stmtparse();
+        if (stmt) body_nodes.push_back(std::move(stmt));
     }
 
     for_ptr->body_ptrs = std::move(body_nodes);
@@ -264,20 +261,8 @@ std::unique_ptr<parallel_node> Parser::parallelparse(){
     std::vector<std::unique_ptr<AST_node>> body_nodes;
 
     while (peek().token_type != TokenType::R_CURLY){
-
-        if (peek().token_type == TokenType::IDENTIFIER){
-            body_nodes.push_back(assignparse());
-        }
-        else if (peek().token_type == TokenType::FOR){
-            body_nodes.push_back(forparse());
-        }
-        else if (peek().token_type == TokenType::PARALLEL){
-            body_nodes.push_back(parallelparse());
-        }
-        else{
-            std::cerr << "Error: unsupported statement (row " << peek().row_idx << ")." << std::endl;
-            advance();
-        }
+        auto stmt = stmtparse();
+        if (stmt) body_nodes.push_back(std::move(stmt));
     }
 
     parallel_ptr->body_ptrs = std::move(body_nodes);
