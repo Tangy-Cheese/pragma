@@ -1,7 +1,0 @@
-fn sumto:int (n:int){
-    sum = 0
-    for i in 0..n {
-        sum = sum+i
-    }
-    return sum
-}

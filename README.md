@@ -4,64 +4,63 @@
 [![License: MIT](https://img.shields.io/github/license/Tangy-Cheese/pragma)](LICENSE)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
 
-Pragma is a DSL for heavy numerical/HPC code that compiles to parallelised
-OpenMP C. "C without pointers, with automatic parallelism" — you write
-readable numerical functions, `pragc` handles memory and OpenMP pragma
-emission.
+Pragma is a small language for numerical/HPC code that compiles to OpenMP C.
+"C without pointers, with automatic parallelism": you write readable numerical
+code, and `pragc` handles memory allocation and emits the OpenMP pragmas,
+including reduction clauses. It also rejects parallel loops it can't prove
+race-free.
 
-Source files use the `.pragma` extension. Full language spec: [spec.md](spec.md).
-
-## Pipeline
+Source files use the `.pragma` extension. Language spec: [spec.md](spec.md).
 
 ```
-source.pragma → Lexer → Tokens → Parser → AST → TypeChecker → CodeGenerator → output.c
+source.pragma → Lexer → Parser → TypeChecker → CodeGenerator → output.c
 ```
 
-## Requirements
+## Quick start
 
-- CMake 3.20 or newer
-- gcc with OpenMP support
-- Catch2 v3, installed system-wide (v2 will not work)
-
-## Building
+Requirements: CMake 3.20+, gcc with OpenMP, Catch2 v3 (system-wide; v2 won't work).
 
 ```bash
 cmake -B build
 cmake --build build
+./build/bin/pragc examples/numerics.pragma --run
 ```
 
-Produces the compiler at `build/bin/pragc`, plus the test binaries.
+## The language
 
-## Testing
+```
+fn square:int (x:int){
+    return x*x
+}
 
-Build first (see above), then:
+fn sum_squares:int (n:int){
+    s = 0
+    parallel i in 0..n {
+        s += square(i)
+    }
+    return s
+}
 
-```bash
-ctest --test-dir build --output-on-failure
+n = 10
+out sum_squares(n)
 ```
 
-Or from inside `build/`, just `ctest`. `--output-on-failure` prints the Catch2
-output for any test that fails; without it you only see pass/fail.
+This prints `285`. The `parallel` loop becomes
+`#pragma omp parallel for reduction(+:s)`, and the last two lines, being outside
+any function, become `main`.
 
-| ctest name    | What it covers                                           |
-|---------------|----------------------------------------------------------|
-| `Lexer`       | tokenising `.pragma` source                              |
-| `Parser`      | building the AST                                         |
-| `Typechecker` | type errors and parallel-safety (accept/reject fixtures) |
-| `Generator`   | emitted C code                                           |
-| `Pragc`       | the `pragc` CLI end to end                               |
-| `Runtime`     | generated OpenMP code actually runs with multiple threads |
+- **Functions:** `fn name:return_type (param:type, ...){ ... return expr }`. Several per file, callable in any order.
+- **Variables:** no declarations; the type comes from the first assignment (`s = 0` makes `s` an `int`).
+- **Types:** `int`, `float`, `double`. Literals: `1` is `int`, `1.5` is `float`.
+- **Arrays:** `a = alloc(float, n)`, indexed with `a[i]`. Use `a[i*n+j]` for 2D.
+- **Loops:** `for i in 0..n { }` runs sequentially; `parallel i in 0..n { }` runs in parallel with OpenMP. Ranges exclude the end value.
+- **Assignment:** `=`, `+=`, `-=`, `*=`, `/=`.
+- **Output:** `out <expr>` prints an `int` or `float`/`double`.
 
-Useful variants:
-
-```bash
-ctest --test-dir build -R Lexer            # run one test by name (regex)
-ctest --test-dir build -V                  # verbose: show all output
-./build/bin/TestTypechecker "<test name>"  # run one Catch2 TEST_CASE directly
-```
-
-Tests run from the repo root, so fixture paths like `tests/lex_files/...` resolve.
-Run the Catch2 binaries directly from the repo root too.
+A `parallel` loop is accepted only when it's provably safe:
+- A variable that already exists outside the loop may only be updated with `+=` or `*=`; these become OpenMP reductions.
+- Array writes must be indexed by exactly the loop variable, e.g. `a[i] = ...`.
+- Arrays that are only read may use any index.
 
 ## Usage
 
@@ -69,50 +68,55 @@ Run the Catch2 binaries directly from the repo root too.
 pragc <input.pragma> [--compile] [--run]
 ```
 
-- (no flags) — emits `output.c`
-- `--compile` — also compiles `output.c` to `output.o` (`gcc -std=c99 -fopenmp -c`)
-- `--run` — builds `output.c` into `output_bin` and runs it. Needs code
-  outside any function (see below).
+- (no flags): writes `output.c`
+- `--compile`: also compiles it to `output.o`
+- `--run`: builds `output_bin` and runs it. Needs code outside any function, which becomes `main`.
 
-A file can hold several functions, which can call each other. Code outside
-any function becomes `main`, and `out <expr>` prints a value:
+A file with only functions has no `main`. It can still be compiled with
+`--compile` and linked from C, as `tests/runtime/` does.
 
-```
-fn square:int (x:int){
-    return x*x
-}
+## Examples
 
-total = 0
-for i in 0..10 {
-    total += square(i)
-}
-out total
-```
+- [`examples/numerics.pragma`](examples/numerics.pragma): a full program.
+  Midpoint-rule integration, compound growth (`*=` reduction), Fibonacci,
+  1D heat diffusion over time, and matrix multiply + trace. Output is
+  identical with 1 and 8 threads.
+- [`examples/kernels.pragma`](examples/kernels.pragma): eight small kernels
+  (dot product, saxpy, stencil, prefix sum, ...), printed from `main`.
 
-A file with only functions has no `main`; it can still be compiled with
-`--compile` and linked from C. See `examples/kernels.pragma`.
+## Testing
 
-## Example
-
-`examples/example.pragma`:
-
-```
-fn sumto:int (n:int){
-    sum = 0
-    for i in 0..n {
-        sum = sum+i
-    }
-    return sum
-}
+```bash
+ctest --test-dir build --output-on-failure
 ```
 
-## Status
+| ctest name    | What it covers                                            |
+|---------------|-----------------------------------------------------------|
+| `Lexer`       | tokenising source                                         |
+| `Parser`      | building the syntax tree                                  |
+| `Typechecker` | type errors and parallel-safety rules                     |
+| `Generator`   | emitted C code                                            |
+| `Pragc`       | the `pragc` command end to end, plus a timing benchmark   |
+| `Runtime`     | generated code gives the right answer at 1 and 8 threads  |
 
-Early / actively developed. Lexer, parser, typechecker, and generator are
-implemented (`src/`); CLI surface (`--compile`, `--run`) is a subset of what's
-described in `spec.md` — flags like `--build`, `-o`, `--dump-ast` aren't wired
-up yet.
+Run a single test with `ctest --test-dir build -R Lexer`, or a single Catch2
+case with `./build/bin/TestParser "<test name>"`. Run test binaries from the repo
+root, because they load input files from `tests/lex_files/`.
+
+## Current limits
+
+Known gaps, roughly in order of how often you'll hit them:
+
+- No `if`/`else` yet. The keywords are reserved, but the parser doesn't handle them.
+- No comments: `#` or `//` in a source file is a syntax error.
+- No parentheses in expressions: write `r*a - r*b`, not `r*(a - b)`.
+- No conversion between `int` and `float`, e.g. `i*h` with `i:int`, `h:float` is a type error.
+- Functions can't take arrays as parameters.
+- Identifiers can't contain digits (`x2` lexes as `x` then `2`).
+- A function with no `return` crashes the compiler.
+- Parse errors are printed but don't stop compilation.
+- Arrays are never freed in the generated C.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).

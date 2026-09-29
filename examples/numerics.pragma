@@ -1,0 +1,93 @@
+fn square:float (x:float){
+    return x*x
+}
+
+fn integrate_square:float (n:int, h:float){
+    xs = alloc(float, n)
+    x = 0.5*h
+    for i in 0..n {
+        xs[i] = x
+        x += h
+    }
+    s = 0.0
+    parallel i in 0..n {
+        s += square(xs[i])
+    }
+    return s*h
+}
+
+fn compound:float (years:int, rate:float){
+    p = 1.0
+    parallel y in 0..years {
+        p *= rate
+    }
+    return p
+}
+
+fn fib:int (n:int){
+    a = 0
+    b = 1
+    for i in 0..n {
+        t = a+b
+        a = b
+        b = t
+    }
+    return a
+}
+
+fn heat_peak:float (n:int, steps:int, r:float){
+    u = alloc(float, n)
+    next = alloc(float, n)
+    parallel i in 0..n {
+        u[i] = 0.0
+        next[i] = 0.0
+    }
+    u[n/2] = 100.0
+    for t in 0..steps {
+        parallel i in 1..n-1 {
+            next[i] = u[i] + r*u[i-1] - 2.0*r*u[i] + r*u[i+1]
+        }
+        parallel i in 1..n-1 {
+            u[i] = next[i]
+        }
+    }
+    return u[n/2]
+}
+
+fn matmul_trace:int (n:int){
+    a = alloc(int, n*n)
+    b = alloc(int, n*n)
+    c = alloc(int, n*n)
+    parallel i in 0..n {
+        for j in 0..n {
+            a[i*n+j] = i+j
+            b[i*n+j] = i*j
+            c[i*n+j] = 0
+        }
+    }
+    parallel i in 0..n {
+        for j in 0..n {
+            for k in 0..n {
+                c[i*n+j] += a[i*n+k]*b[k*n+j]
+            }
+        }
+    }
+    trace = 0
+    parallel i in 0..n {
+        trace += c[i*n+i]
+    }
+    return trace
+}
+
+grid = 1000
+out integrate_square(grid, 0.001)
+
+out compound(10, 1.05)
+
+out fib(30)
+
+cells = 64
+out heat_peak(cells, 200, 0.25)
+
+size = 20
+out matmul_trace(size)

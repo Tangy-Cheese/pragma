@@ -67,3 +67,8 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# pragc outputs
+output.c
+output.o
+output_bin
