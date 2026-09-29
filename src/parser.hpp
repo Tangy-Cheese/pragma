@@ -19,6 +19,7 @@ struct for_node;
 struct alloc_node;
 struct index_node;
 struct parallel_node;
+struct call_node;
 
 class Parser{
 public:
@@ -169,6 +170,11 @@ struct alloc_node: public AST_node{
 struct index_node: public AST_node{
     // token holds the base array identifier
     std::unique_ptr<AST_node> index_ptr;
+};
+
+struct call_node: public AST_node{
+    // token holds the called function's identifier
+    std::vector<std::unique_ptr<AST_node>> arg_ptrs;
 };
 
 struct for_node: public AST_node{

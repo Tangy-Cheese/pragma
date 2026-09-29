@@ -299,6 +299,27 @@ std::unique_ptr<AST_node> Parser::parse_primary(){
 
         advance();
 
+        if (t.token_type == TokenType::IDENTIFIER && peek().token_type == TokenType::L_PAREN){
+            advance();
+
+            auto call_ptr = std::make_unique<call_node>();
+            call_ptr->token = t;
+
+            if (peek().token_type != TokenType::R_PAREN){
+
+                call_ptr->arg_ptrs.push_back(parse_expr(0));
+
+                while (peek().token_type == TokenType::COMMA){
+                    advance();
+                    call_ptr->arg_ptrs.push_back(parse_expr(0));
+                }
+            }
+
+            expect(TokenType::R_PAREN);
+
+            return call_ptr;
+        }
+
         if (t.token_type == TokenType::IDENTIFIER && peek().token_type == TokenType::L_BRACKET){
             advance();
 
