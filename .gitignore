@@ -72,3 +72,6 @@ Testing/
 output.c
 output.o
 output_bin
+
+# local notes
+spec.md

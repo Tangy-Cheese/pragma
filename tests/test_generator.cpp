@@ -2,8 +2,8 @@
 #include <memory>
 #include <fstream>
 #include <sstream>
-#include "../src/generator.hpp"
-#include "../src/typecheck.hpp"
+#include "generator.hpp"
+#include "typecheck.hpp"
 
 
 TEST_CASE("test codegen for assignment and for loop"){

@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
-#include "../src/parser.hpp"
-#include "../src/lexer.hpp"
+#include "parser.hpp"
+#include "lexer.hpp"
 
 TEST_CASE("test function parser"){
     

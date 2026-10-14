@@ -17,22 +17,22 @@ find_package(Catch2 3 REQUIRED)
 enable_testing()
 
 add_library(DiagnosticLib STATIC src/diagnostic.cpp)
-target_include_directories(DiagnosticLib PUBLIC src)
+target_include_directories(DiagnosticLib PUBLIC include)
 
 add_library(LexerLib STATIC src/lexer.cpp)
-target_include_directories(LexerLib PUBLIC src)
+target_include_directories(LexerLib PUBLIC include)
 
 add_library(ParserLib STATIC src/parser.cpp)
-target_include_directories(ParserLib PUBLIC src)
+target_include_directories(ParserLib PUBLIC include)
 target_link_libraries(ParserLib PRIVATE LexerLib)
 
 add_library(TypecheckLib STATIC src/typecheck.cpp)
-target_include_directories(TypecheckLib PUBLIC src)
+target_include_directories(TypecheckLib PUBLIC include)
 target_link_libraries(TypecheckLib PRIVATE ParserLib)
 target_link_libraries(TypecheckLib PUBLIC DiagnosticLib)
 
 add_library(GeneratorLib STATIC src/generator.cpp)
-target_include_directories(GeneratorLib PUBLIC src)
+target_include_directories(GeneratorLib PUBLIC include)
 target_link_libraries(GeneratorLib PRIVATE ParserLib)
 
 add_executable(pragc src/main.cpp)

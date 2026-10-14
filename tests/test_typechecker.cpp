@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
-#include "../src/typecheck.hpp"
+#include "typecheck.hpp"
 
 
 TEST_CASE("test function with wrong return type is rejected"){

@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
 #include <vector>
-#include "../src/lexer.hpp"
+#include "lexer.hpp"
 
 TEST_CASE("Test underscores in identifiers"){
 
