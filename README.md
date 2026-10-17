@@ -16,6 +16,10 @@ Source files use the `.pragma` extension.
 source.pragma → Lexer → Parser → TypeChecker → CodeGenerator → output.c
 ```
 
+## Demo
+
+![pragc compiling a .pragma file to OpenMP C and running it](demo.gif)
+
 ## Quick start
 
 Requirements: CMake 3.20+, gcc with OpenMP, Catch2 v3 (system-wide; v2 won't work).
