@@ -10,7 +10,7 @@ code, and `pragc` handles memory allocation and emits the OpenMP pragmas,
 including reduction clauses. It also rejects parallel loops it can't prove
 race-free.
 
-Source files use the `.pragma` extension. Language spec: [spec.md](spec.md).
+Source files use the `.pragma` extension.
 
 ```
 source.pragma → Lexer → Parser → TypeChecker → CodeGenerator → output.c
